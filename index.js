@@ -7,6 +7,8 @@ var GRAVITY = 0.2;
 var PARTICLE_MARGIN = 60;
 var KEYBOARD_SPEED = 6;
 var MOUSE_SPEED = 48;
+var MAX_BULLETS = 6;
+var BULLET_SPEED = 10;
 
 var game = new Gesso();
 var clickLock = 0;
@@ -55,6 +57,10 @@ document.addEventListener('keydown', function (e) {
     keysDown.left = true;
   } else if (e.which === 39 || e.which === 68) {
     keysDown.right = true;
+  } else if (e.which === 32 || e.which === 16 || e.which === 88 || e.which === 90) {
+    if (!e.repeat) {
+      keysDown.fired = true;
+    }
   } else {
     return;
   }
@@ -80,6 +86,8 @@ game.click(function (e) {
   var rect = canvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left;
 
+  keysDown.fired = true;
+
   // Prevent unintentional game starts
   if (clickLock > 0) {
     return;
@@ -101,6 +109,17 @@ game.update(function (t) {
     clickLock -= 1;
   }
 
+  // Update bullets
+  for (var b = 0; b < bullets.length; b++) {
+    bullets[b].y -= bullets[b].s;
+    bullets[b].angle += bullets[b].rotation;
+    // Delete bullet when out of bounds
+    if (bullets[b].y + bullets[b].r < 0) {
+      bullets.splice(b, 1);
+      b--;
+    }
+  }
+
   // Update player position
   if (mouseX !== null) {
     if (mouseX < player.x) {
@@ -117,6 +136,22 @@ game.update(function (t) {
       x += KEYBOARD_SPEED;
     }
     player.x = helpers.clamp(x, player.r + 2, game.width - player.r - 2);
+  }
+
+  // Fire
+  if (keysDown.fired) {
+    keysDown.fired = false;
+    // Limit bullet count
+    if (bullets.length < MAX_BULLETS) {
+      bullets.push({
+        x: player.x,
+        y: player.y - player.r - 10,
+        r: player.r,
+        s: BULLET_SPEED,
+        angle: -0.3,
+        rotation: 0.1
+      });
+    }
   }
 
   // Adjust player personality
@@ -145,6 +180,13 @@ game.render(function (ctx) {
   // Draw background
   ctx.fillStyle = '#4A913C';
   ctx.fillRect(0, 0, game.width, game.height);
+
+  // Draw bullets
+  for (var b = 0; b < bullets.length; b++) {
+    helpers.rotated(ctx, bullets[b].x, bullets[b].y, bullets[b].angle, function (x, y) {
+      helpers.fillStar(ctx, x, y, 5, bullets[b].r, bullets[b].r / 2, '#ff4');
+    });
+  }
 
   // Draw player
   if (player.playing) {
@@ -181,11 +223,6 @@ game.render(function (ctx) {
     ctx.fillRect(player.x + 11, player.y - 0, 6, 1);
     ctx.fillRect(player.x + 10, player.y + 5, 6, 1);
     */
-  }
-
-  // Draw bullets
-  for (var b = 0; b < bullets.length; b++) {
-    helpers.fillCircle(ctx, bullets[b].x, bullets[b].y, bullets[b].r, '#000');
   }
 
   // Draw particles

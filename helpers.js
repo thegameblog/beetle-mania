@@ -16,6 +16,15 @@ var helpers = {
     ctx.scale(1 / scaleX, 1 / scaleY);
     ctx.translate(-x, -y);
   },
+  rotated: function (ctx, x, y, angle, cb) {
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.translate(-x, -y);
+    cb(x, y);
+    ctx.translate(x, y);
+    ctx.rotate(-angle);
+    ctx.translate(-x, -y);
+  },
   fillCircle: function (ctx, x, y, r, color, startAngle, endAngle) {
     ctx.beginPath();
     ctx.arc(x, y, r, startAngle || 0, endAngle || 2 * Math.PI, false);
@@ -30,21 +39,41 @@ var helpers = {
     }
   },
   fillRotatedRect: function (ctx, angle, x, y, width, height, color) {
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.translate(-x, -y);
     var fillStyle = null;
     if (color) {
       fillStyle = ctx.fillStyle;
       ctx.fillStyle = color;
     }
-    ctx.fillRect(x, y, width, height);
+    helpers.rotated(ctx, x, y, angle, function () {
+      ctx.fillRect(x, y, width, height);
+    });
     if (fillStyle !== null) {
       ctx.fillStyle = fillStyle;
     }
-    ctx.translate(x, y);
-    ctx.rotate(-angle);
-    ctx.translate(-x, -y);
+  },
+  fillStar: function (ctx, x, y, spikes, outerRadius, innerRadius, color) {
+    var fillStyle = null;
+    if (color) {
+      fillStyle = ctx.fillStyle;
+      ctx.fillStyle = color;
+    }
+    var rot = Math.PI / 2 * 3;
+    var step = Math.PI / spikes;
+    ctx.strokeSyle = '#000';
+    ctx.beginPath();
+    ctx.moveTo(x, y - outerRadius);
+    for (var i = 0; i < spikes; i++) {
+      ctx.lineTo(x + Math.cos(rot) * outerRadius, y + Math.sin(rot) * outerRadius);
+      rot += step;
+      ctx.lineTo(x + Math.cos(rot) * innerRadius, y + Math.sin(rot) * innerRadius);
+      rot += step;
+    }
+    ctx.lineTo(x, y - outerRadius);
+    ctx.closePath();
+    ctx.fill();
+    if (fillStyle !== null) {
+      ctx.fillStyle = fillStyle;
+    }
   },
   outlineText: function (ctx, text, x, y, color, outline) {
     ctx.fillStyle = color;
