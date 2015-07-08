@@ -51,9 +51,9 @@ document.addEventListener('mousemove', function (e) {
 });
 
 document.addEventListener('keydown', function (e) {
-  if (e.which === 37) {
+  if (e.which === 37 || e.which === 65) {
     keysDown.left = true;
-  } else if (e.which === 39) {
+  } else if (e.which === 39 || e.which === 68) {
     keysDown.right = true;
   } else {
     return;
@@ -69,9 +69,9 @@ document.addEventListener('keydown', function (e) {
 });
 
 document.addEventListener('keyup', function (e) {
-  if (e.which === 37) {
+  if (e.which === 37 || e.which === 65) {
     keysDown.left = false;
-  } else if (e.which === 39) {
+  } else if (e.which === 39 || e.which === 68) {
     keysDown.right = false;
   }
 });
