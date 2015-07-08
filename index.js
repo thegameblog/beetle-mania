@@ -101,6 +101,7 @@ game.update(function (t) {
     clickLock -= 1;
   }
 
+  // Update player position
   if (mouseX !== null) {
     if (mouseX < player.x) {
       player.x = helpers.clamp(player.x - MOUSE_SPEED, Math.max(player.r + 2, mouseX), game.width - player.r - 2);
@@ -111,7 +112,8 @@ game.update(function (t) {
     var x = player.x;
     if (keysDown.left) {
       x -= KEYBOARD_SPEED;
-    } else if (keysDown.right) {
+    }
+    if (keysDown.right) {
       x += KEYBOARD_SPEED;
     }
     player.x = helpers.clamp(x, player.r + 2, game.width - player.r - 2);
