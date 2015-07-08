@@ -7,11 +7,44 @@ var helpers = {
   randInt: function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
+  scaled: function (ctx, x, y, scaleX, scaleY, cb) {
+    ctx.translate(x, y);
+    ctx.scale(scaleX, scaleY);
+    ctx.translate(-x, -y);
+    cb(x, y);
+    ctx.translate(x, y);
+    ctx.scale(1 / scaleX, 1 / scaleY);
+    ctx.translate(-x, -y);
+  },
   fillCircle: function (ctx, x, y, r, color, startAngle, endAngle) {
     ctx.beginPath();
     ctx.arc(x, y, r, startAngle || 0, endAngle || 2 * Math.PI, false);
-    ctx.fillStyle = color;
+    var fillStyle = null;
+    if (color) {
+      fillStyle = ctx.fillStyle;
+      ctx.fillStyle = color;
+    }
     ctx.fill();
+    if (fillStyle !== null) {
+      ctx.fillStyle = fillStyle;
+    }
+  },
+  fillRotatedRect: function (ctx, angle, x, y, width, height, color) {
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.translate(-x, -y);
+    var fillStyle = null;
+    if (color) {
+      fillStyle = ctx.fillStyle;
+      ctx.fillStyle = color;
+    }
+    ctx.fillRect(x, y, width, height);
+    if (fillStyle !== null) {
+      ctx.fillStyle = fillStyle;
+    }
+    ctx.translate(x, y);
+    ctx.rotate(-angle);
+    ctx.translate(-x, -y);
   },
   outlineText: function (ctx, text, x, y, color, outline) {
     ctx.fillStyle = color;

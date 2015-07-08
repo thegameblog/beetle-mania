@@ -18,7 +18,7 @@ var player = {
   x: game.width / 2,
   y: game.height - 30,
   r: 12,
-  color: '#ff4',
+  color: '#000',
   blinkFor: 0,
   blinkNext: 60 * 3,
   blinkDelay: 60 * 3
@@ -118,6 +118,7 @@ game.update(function (t) {
   }
 
   // Adjust player personality
+  player.move = t % 8 >= 4;
   player.blinkFor = Math.max(0, player.blinkFor - 1);
   player.blinkNext = Math.max(0, player.blinkNext - 1);
   if (player.blinkNext === 0) {
@@ -145,19 +146,39 @@ game.render(function (ctx) {
 
   // Draw player
   if (player.playing) {
+    ctx.fillStyle = player.color;
     helpers.fillCircle(ctx, player.x, player.y, player.r, player.color);
+    ctx.fillStyle = '#cc0';
     if (player.blinkFor > 0) {
-      ctx.fillStyle = '#330';
-      //ctx.fillRect(player.x - player.width / 2 + 7, player.y + 5, 6, 1);
-      //ctx.fillRect(player.x + player.width / 2 - 13, player.y + 5, 6, 1);
-      ctx.fillRect(player.x + player.width / 2 + 7, player.y + 5, 6, 1);
-      ctx.fillRect(player.x + player.width / 2 - 13, player.y + 5, 6, 1);
+      ctx.fillRect(player.x - 4 - 2, player.y - 7, 4, 1);
+      ctx.fillRect(player.x + 4 - 2, player.y - 7, 4, 1);
     } else {
-      //helpers.fillCircle(ctx, player.x - player.width / 2 + 10, player.y + 5, 3, '#330');
-      //helpers.fillCircle(ctx, player.x + player.width / 2 - 10, player.y + 5, 3, '#330');
-      helpers.fillCircle(ctx, player.x + player.width / 2 - 10, player.y + 5, 3, '#330');
-      helpers.fillCircle(ctx, player.x + player.width / 2 + 10, player.y + 5, 3, '#330');
+      helpers.fillCircle(ctx, player.x - 4, player.y - 6, 1);
+      helpers.fillCircle(ctx, player.x + 4, player.y - 6, 1);
     }
+    ctx.fillStyle = player.color;
+    // Neck
+    ctx.fillRect(player.x - 4, player.y - 16, 8, 6);
+    // Mandible
+    var moveMandibleBy = player.move ? 0 : 1;
+    helpers.scaled(ctx, player.x, player.y - 14 - moveMandibleBy, 1, 0.65, function (x, y) {
+      helpers.fillCircle(ctx, x, y, 6, player.color, Math.PI, 0);
+    });
+    // Legs
+    var moveLegsBy = player.move ? 0 : 0.3;
+    helpers.fillRotatedRect(ctx, Math.PI + 0.3 + moveLegsBy, player.x - 10, player.y - 6, 8, 2, player.color);
+    helpers.fillRotatedRect(ctx, Math.PI + 0.1 + moveLegsBy, player.x - 12, player.y, 8, 2, player.color);
+    helpers.fillRotatedRect(ctx, Math.PI + -0.1 - moveLegsBy, player.x - 11, player.y + 5, 8, 2, player.color);
+    helpers.fillRotatedRect(ctx, -0.3 - moveLegsBy, player.x + 9, player.y - 8, 8, 2, player.color);
+    helpers.fillRotatedRect(ctx, -0.1 - moveLegsBy, player.x + 11, player.y - 2, 8, 2, player.color);
+    helpers.fillRotatedRect(ctx, 0.1 + moveLegsBy, player.x + 11, player.y + 4, 8, 2, player.color);
+    /*ctx.fillRect(player.x - 16, player.y - 5, 6, 1);
+    ctx.fillRect(player.x - 17, player.y - 0, 6, 1);
+    ctx.fillRect(player.x - 16, player.y + 5, 6, 1);
+    ctx.fillRect(player.x + 10, player.y - 5, 6, 1);
+    ctx.fillRect(player.x + 11, player.y - 0, 6, 1);
+    ctx.fillRect(player.x + 10, player.y + 5, 6, 1);
+    */
   }
 
   // Draw bullets
