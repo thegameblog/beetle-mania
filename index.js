@@ -201,6 +201,9 @@ game.update(function (t) {
 
   // Update particles
   for (var p = 0; p < particles.length; p++) {
+    if (particles[p].ay) {
+      particles[p].vy += particles[p].ay;
+    }
     particles[p].x += particles[p].vx;
     particles[p].y += particles[p].vy;
     // Delete particle when out of bounds
@@ -243,7 +246,7 @@ game.update(function (t) {
       if (helpers.intersected(
           {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
           {x: bullets[b].x - bullets[b].r, y: bullets[b].y - bullets[b].r, width: bullets[b].r * 2, height: bullets[b].r * 2})) {
-        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)'}, 10, 6, 2);
+        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)', ay: GRAVITY}, 10, 6, 2);
         helpers.explode(stars, acorns[a], {r: 10, energy: 15, angle: 0, rotation: -0.3}, 5, 8, 0);
         bullets.splice(b, 1);
         b--;
@@ -260,7 +263,7 @@ game.update(function (t) {
       if (helpers.intersected(
           {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
           {x: stars[s].x - stars[s].r, y: stars[s].y - stars[s].r, width: stars[s].r * 2, height: stars[s].r * 2})) {
-        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)'}, 30, 6, 2);
+        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)', ay: GRAVITY}, 30, 6, 2);
         helpers.explode(stars, acorns[a], {r: 10, energy: 20, angle: 0, rotation: -0.3}, 5, 8, 0);
         stars.splice(s, 1);
         s--;
