@@ -37,6 +37,7 @@ var acorns = [];
 var particles = [];
 
 function newGame() {
+  player.x = game.width / 2;
   player.playing = true;
   player.playTime = 0;
   // TODO: newAcornGenerator()?
