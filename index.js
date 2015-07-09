@@ -80,6 +80,10 @@ document.addEventListener('keydown', function (e) {
     if (!e.repeat) {
       keysDown.fired = true;
     }
+    if (e.target === document.body) {
+      e.preventDefault();
+      return false;
+    }
     return;
   } else {
     return;
