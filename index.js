@@ -10,6 +10,7 @@ var MOUSE_SPEED = 48;
 var MAX_BULLETS = 5;
 var BULLET_SPEED = 10;
 var MAX_ACORNS = 32;
+var POINTS_PER_HIT = 10;
 
 var game = new Gesso();
 var clickLock = 0;
@@ -246,6 +247,7 @@ game.update(function (t) {
       if (helpers.intersected(
           {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
           {x: bullets[b].x - bullets[b].r, y: bullets[b].y - bullets[b].r, width: bullets[b].r * 2, height: bullets[b].r * 2})) {
+        player.score += POINTS_PER_HIT;
         helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)', ay: GRAVITY}, 30, 6, 2);
         helpers.explode(stars, acorns[a], {r: 10, energy: 15, angle: 0, rotation: -0.3, multiplier: 2}, 5, 8, 0);
         bullets.splice(b, 1);
@@ -263,6 +265,7 @@ game.update(function (t) {
       if (helpers.intersected(
           {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
           {x: stars[s].x - stars[s].r, y: stars[s].y - stars[s].r, width: stars[s].r * 2, height: stars[s].r * 2})) {
+        player.score += POINTS_PER_HIT * stars[s].multiplier;
         helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)', ay: GRAVITY}, Math.ceil(30 / stars[s].multiplier), 6, 2);
         helpers.explode(stars, acorns[a], {r: 10, energy: 20, angle: 0, rotation: -0.3, multiplier: stars[s].multiplier}, 5, 8, 0);
         stars.splice(s, 1);
