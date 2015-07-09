@@ -80,23 +80,16 @@ document.addEventListener('keydown', function (e) {
     if (!e.repeat) {
       keysDown.fired = true;
     }
-    if (e.target === document.body) {
-      e.preventDefault();
-      return false;
-    }
-    return;
   } else if (e.which === 40) {
-    if (e.target === document.body) {
-      e.preventDefault();
-      return false;
-    }
-    return;
+    // Ignore down key
   } else {
     return;
   }
 
-  // Switch to keyboard controls
-  mouseX = null;
+  // Switch to keyboard controls when moving
+  if (e.which === 37 || e.which === 65 || e.which === 39 || e.which === 68) {
+    mouseX = null;
+  }
 
   // Start new game if not currently playing
   if (!player.playing) {
