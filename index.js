@@ -85,6 +85,12 @@ document.addEventListener('keydown', function (e) {
       return false;
     }
     return;
+  } else if (e.which === 40) {
+    if (e.target === document.body) {
+      e.preventDefault();
+      return false;
+    }
+    return;
   } else {
     return;
   }
@@ -95,6 +101,11 @@ document.addEventListener('keydown', function (e) {
   // Start new game if not currently playing
   if (!player.playing) {
     newGame();
+  }
+
+  if (e.target === document.body) {
+    e.preventDefault();
+    return false;
   }
 });
 
