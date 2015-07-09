@@ -9,6 +9,7 @@ var KEYBOARD_SPEED = 6;
 var MOUSE_SPEED = 48;
 var MAX_BULLETS = 6;
 var BULLET_SPEED = 10;
+var MAX_ACORNS = 32;
 
 var game = new Gesso();
 var clickLock = 0;
@@ -217,7 +218,7 @@ game.update(function (t) {
   // Spawn acorn
   // TODO: Base this off of difficulty?
   // TODO: Base this off of enemies on-screen?
-  if (player.playing && player.playTime % 20 === 0) {
+  if (player.playing && player.playTime % 20 === 0 && acorns.length < MAX_ACORNS) {
     newAcorn();
   }
 });
