@@ -183,8 +183,8 @@ game.update(function (t) {
 
   // Update particles
   for (var p = 0; p < particles.length; p++) {
-    particles[p].x -= particles[p].vx;
-    particles[p].y -= particles[p].vy;
+    particles[p].x += particles[p].vx;
+    particles[p].y += particles[p].vy;
     // Delete particle when out of bounds
     if (particles[p].x + particles[p].r < -PARTICLE_MARGIN || particles[p].y + particles[p].r < -PARTICLE_MARGIN ||
         particles[p].x - particles[p].r > game.width + PARTICLE_MARGIN || particles[p].y - particles[p].r > game.height + PARTICLE_MARGIN) {
