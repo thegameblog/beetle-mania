@@ -125,7 +125,9 @@ game.update(function (t) {
   }
 
   // Update total play-time
-  player.playTime += 1;
+  if (player.playing) {
+    player.playTime += 1;
+  }
 
   // Update bullets
   for (var b = 0; b < bullets.length; b++) {
@@ -215,7 +217,7 @@ game.update(function (t) {
   // Spawn acorn
   // TODO: Base this off of difficulty?
   // TODO: Base this off of enemies on-screen?
-  if (player.playTime % 60 === 0) {
+  if (player.playing && player.playTime % 20 === 0) {
     newAcorn();
   }
 });
