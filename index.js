@@ -280,6 +280,8 @@ game.update(function (t) {
 });
 
 game.render(function (ctx) {
+  ctx.save();
+
   // Draw background
   ctx.fillStyle = '#4A913C';
   ctx.fillRect(0, 0, game.width, game.height);
@@ -370,6 +372,8 @@ game.render(function (ctx) {
     ctx.textAlign = 'center';
     helpers.outlineText(ctx, player ? player.score : 'High Score', game.width / 2, 22, '#333', '#fff');
   }
+
+  ctx.restore();
 });
 
 // TODO: Delete this
