@@ -92,9 +92,10 @@ var helpers = {
   },
   explode: function (particles, origin, values, intensity, power, powerVariance) {
     intensity = intensity || 100;
-    powerVariance = typeof powerVariance !== 'undefined' ? Math.abs(powerVariance) : 5;
-    var minVelocity = helpers.clamp(0, power - powerVariance);
-    var maxVelocity = helpers.clamp(0, power + powerVariance);
+    power = power || 15;
+    powerVariance = (powerVariance || powerVariance === 0) ? powerVariance : 5;
+    var minVelocity = Math.max(0, power - powerVariance);
+    var maxVelocity = Math.max(0, power + powerVariance);
     for (var index = 0; index < intensity; index++) {
       var angle = helpers.randInt(0, 360);
       var velocity = helpers.randInt(minVelocity, maxVelocity);
