@@ -77,6 +77,7 @@ document.addEventListener('keydown', function (e) {
     if (!e.repeat) {
       keysDown.fired = true;
     }
+    return;
   } else {
     return;
   }
