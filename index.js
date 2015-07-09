@@ -30,6 +30,7 @@ var player = {
 var mouseX = null;
 var keysDown = {left: false, right: false};
 var bullets = [];
+var stars = [];
 var acorns = [];
 var particles = [];
 
@@ -142,6 +143,19 @@ game.update(function (t) {
     }
   }
 
+  // Update stars
+  for (var s = 0; s < stars.length; s++) {
+    stars[s].x += stars[s].vx;
+    stars[s].y += stars[s].vy;
+    stars[s].angle += stars[s].rotation;
+    stars[s].energy -= 1;
+    // Delete stars when out of energy
+    if (stars[s].energy <= 0) {
+      stars.splice(s, 1);
+      s--;
+    }
+  }
+
   // Update player position
   if (mouseX !== null) {
     if (mouseX < player.x) {
@@ -222,6 +236,40 @@ game.update(function (t) {
   if (player.playing && player.playTime % 20 === 0 && acorns.length < MAX_ACORNS) {
     newAcorn();
   }
+
+  // Check for bullet / acorn collisions
+  for (b = 0; b < bullets.length; b++) {
+    for (a = 0; a < acorns.length; a++) {
+      if (helpers.intersected(
+          {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
+          {x: bullets[b].x - bullets[b].r, y: bullets[b].y - bullets[b].r, width: bullets[b].r * 2, height: bullets[b].r * 2})) {
+        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)'}, 10, 6, 2);
+        helpers.explode(stars, acorns[a], {r: 10, energy: 15, angle: 0, rotation: -0.3}, 5, 8, 0);
+        bullets.splice(b, 1);
+        b--;
+        acorns.splice(a, 1);
+        a--;
+        break;
+      }
+    }
+  }
+
+  // Check for star / acorn collisions
+  for (s = 0; s < stars.length; s++) {
+    for (a = 0; a < acorns.length; a++) {
+      if (helpers.intersected(
+          {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
+          {x: stars[s].x - stars[s].r, y: stars[s].y - stars[s].r, width: stars[s].r * 2, height: stars[s].r * 2})) {
+        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)'}, 30, 6, 2);
+        helpers.explode(stars, acorns[a], {r: 10, energy: 20, angle: 0, rotation: -0.3}, 5, 8, 0);
+        stars.splice(s, 1);
+        s--;
+        acorns.splice(a, 1);
+        a--;
+        break;
+      }
+    }
+  }
 });
 
 game.render(function (ctx) {
@@ -233,6 +281,13 @@ game.render(function (ctx) {
   for (var b = 0; b < bullets.length; b++) {
     helpers.rotated(ctx, bullets[b].x, bullets[b].y, bullets[b].angle, function (x, y) {
       helpers.fillStar(ctx, x, y, 5, bullets[b].r, bullets[b].r / 2, '#ff4');
+    });
+  }
+
+  // Draw stars
+  for (var s = 0; s < stars.length; s++) {
+    helpers.rotated(ctx, stars[s].x, stars[s].y, stars[s].angle, function (x, y) {
+      helpers.fillStar(ctx, x, y, 5, stars[s].r, stars[s].r / 2, '#EF7800');
     });
   }
 
