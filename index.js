@@ -7,7 +7,7 @@ var GRAVITY = 0.2;
 var PARTICLE_MARGIN = 60;
 var KEYBOARD_SPEED = 6;
 var MOUSE_SPEED = 48;
-var MAX_BULLETS = 6;
+var MAX_BULLETS = 5;
 var BULLET_SPEED = 10;
 var MAX_ACORNS = 32;
 
