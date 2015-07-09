@@ -29,7 +29,7 @@ var player = {
   blinkNext: 60 * 3,
   blinkDelay: 60 * 3
 };
-var mouseX = null;
+var mouseX = 0;
 var keysDown = {left: false, right: false};
 var bullets = [];
 var stars = [];
