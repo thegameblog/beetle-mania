@@ -21,6 +21,8 @@ var player = {
   playing: false,
   playTime: 0,
   score: 0,
+  displayedScore: 0,
+  displayedScoreDelay: 0,
   x: game.width / 2,
   y: game.height - 30,
   r: 12,
@@ -286,6 +288,13 @@ game.update(function (t) {
       }
     }
   }
+
+  // Update score
+  player.displayedScoreDelay = Math.max(player.displayedScoreDelay - 1, 0);
+  if (player.displayedScore < player.score && player.displayedScoreDelay === 0) {
+    player.displayedScore = Math.min(player.displayedScore + 10, player.score);
+    player.displayedScoreDelay = 3;
+  }
 });
 
 game.render(function (ctx) {
@@ -379,7 +388,7 @@ game.render(function (ctx) {
   if (player.playing || player.played) {
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
-    helpers.outlineText(ctx, player ? player.score : 'High Score', game.width / 2, 22, '#333', '#fff');
+    helpers.outlineText(ctx, player ? player.displayedScore : 'High Score', game.width / 2, 22, '#333', '#fff');
   }
 
   ctx.restore();
