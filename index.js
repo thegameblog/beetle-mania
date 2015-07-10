@@ -43,12 +43,16 @@ function newGame() {
   player.playing = true;
   player.playTime = 0;
   // TODO: newAcornGenerator()?
+  player.score = 0;
+  player.displayedScore = 0;
+  player.displayedScoreDelay = 0;
 }
 
 function endGame() {
   player.playing = false;
   player.played = true;
   clickLock = 30;
+  // TODO: Set high score
 }
 
 function newAcorn() {
