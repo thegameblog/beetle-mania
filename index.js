@@ -14,7 +14,7 @@ var MAX_ACORNS = 32;
 var POINTS_PER_HIT = 10;
 
 var game = new Gesso();
-var clickLock = 0;
+var startLock = 0;
 var showClickToStart;
 
 var player = {
@@ -51,7 +51,7 @@ function newGame() {
 function endGame() {
   player.playing = false;
   player.played = true;
-  clickLock = 30;
+  startLock = 30;
   // TODO: Set high score
 }
 
@@ -124,7 +124,7 @@ game.click(function (e) {
   keysDown.fired = true;
 
   // Prevent unintentional game starts
-  if (clickLock > 0) {
+  if (startLock > 0) {
     return;
   }
 
@@ -140,8 +140,8 @@ game.click(function (e) {
 game.update(function (t) {
   // Show start message and adjust click lock
   showClickToStart = !player.playing && ((t % 120 > 5 && t % 120 < 20) || t % 120 > 25);
-  if (clickLock > 0) {
-    clickLock -= 1;
+  if (startLock > 0) {
+    startLock -= 1;
   }
 
   // Update total play-time
