@@ -1,5 +1,3 @@
-var extend = require('util')._extend;
-
 var helpers = {
   clamp: function (value, min, max) {
     return Math.min(Math.max(value, min), max);

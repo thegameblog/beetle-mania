@@ -37,7 +37,6 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
   star.die();
   acorn.die();
 });
-
 entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
   // Check for bullet / acorn collisions
   if (!helpers.intersected(
