@@ -1,7 +1,7 @@
 Beetle Mania
 ============
 
-[![Screenshot](screenshot.png)](http://thegameblog.com/beetle-mania)
+[![Screenshot](beetle-mania.png)](http://thegameblog.com/beetle-mania)
 
 
 A remake of a secret mini-game in Mario RPG.
