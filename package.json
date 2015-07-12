@@ -24,7 +24,7 @@
     "maxBullets": 5,
     "bulletSpeed": 10,
     "acornSpawnTime": 30,
-    "maxAcorns": 32,
+    "maxAcorns": 40,
     "pointsPerHit": 10
   }
 }
