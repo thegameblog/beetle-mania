@@ -4,7 +4,7 @@ var Gesso = require('gesso');
 var Entity = require('gesso-entity').Entity;
 var Bullet = require('./sprites').Bullet;
 var helpers = require('./helpers');
-var env = require('./package.json').game;
+var env = require('../package.json').game;
 
 var canvas = Gesso.getCanvas();
 var newGameSignal = false;

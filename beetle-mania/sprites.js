@@ -1,6 +1,6 @@
 var Entity = require('gesso-entity').Entity;
 var helpers = require('./helpers');
-var env = require('./package.json').game;
+var env = require('../package.json').game;
 
 module.exports = {
   Bullet: Entity.extend({
