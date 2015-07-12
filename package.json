@@ -12,6 +12,19 @@
     "build": "gesso build"
   },
   "dependencies": {
-    "gesso": "^0.11.0"
+    "class.extend": "^0.9.1",
+    "gesso": "^0.11.0",
+    "gesso-entity": "~0.0.1"
+  },
+  "game": {
+    "gravity": 0.2,
+    "particleMargin": 60,
+    "keyboardSpeed": 6,
+    "mouseSpeed": 48,
+    "maxBullets": 5,
+    "bulletSpeed": 10,
+    "acornSpawnTime": 30,
+    "maxAcorns": 32,
+    "pointsPerHit": 10
   }
 }

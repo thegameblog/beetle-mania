@@ -1,304 +1,84 @@
-/* globals document */
-
 var Gesso = require('gesso');
+var Group = require('gesso-entity').Group;
+var Player = require('./player');
+var sprites = require('./sprites');
 var helpers = require('./helpers');
+var env = require('./package.json').game;
 
-var GRAVITY = 0.2;
-var PARTICLE_MARGIN = 60;
-var KEYBOARD_SPEED = 6;
-var MOUSE_SPEED = 48;
-var MAX_BULLETS = 5;
-var BULLET_SPEED = 10;
-var ACORN_SPAWN_TIME = 30;
-var MAX_ACORNS = 32;
-var POINTS_PER_HIT = 10;
+var Bullet = sprites.Bullet;
+var Star = sprites.Star;
+var Acorn = sprites.Acorn;
+var Particle = sprites.Particle;
 
 var game = new Gesso();
-var startLock = 0;
-var showClickToStart;
+var entities = new Group(game);
+var player = new Player();
+var showClickToStart = false;
+var acornCount = 0;
 
-var player = {
-  playing: false,
-  playTime: 0,
-  score: 0,
-  displayedScore: 0,
-  displayedScoreDelay: 0,
-  x: game.width / 2,
-  y: game.height - 30,
-  r: 12,
-  color: '#000',
-  blinkFor: 0,
-  blinkNext: 60 * 3,
-  blinkDelay: 60 * 3
-};
-var mouseX = 0;
-var keysDown = {left: false, right: false};
-var bullets = [];
-var stars = [];
-var acorns = [];
-var particles = [];
+// Add player
+entities.push(player);
 
-function newGame() {
-  player.x = game.width / 2;
-  player.playing = true;
-  player.playTime = 0;
-  // TODO: newAcornGenerator()?
-  player.score = 0;
-  player.displayedScore = 0;
-  player.displayedScoreDelay = 0;
-}
-
-function endGame() {
-  player.playing = false;
-  player.played = true;
-  startLock = 30;
-  // TODO: Set high score
-}
-
-function newAcorn() {
-  var r = 16;
-  acorns.push({
-    r: r,
-    x: helpers.randInt(r, game.width - r),
-    y: -r,
-    vx: helpers.randInt(1, 5) * (helpers.randInt(0, 1) ? -1 : 1),
-    vy: 0,
-    angle: 0,
-    rotation: 0.1
-  });
-}
-
-// TODO: Mobile controls
-var canvas = Gesso.getCanvas();
-document.addEventListener('mousemove', function (e) {
-  if (mouseX === null) {
+// Add interactions
+entities.pushInteraction(Star, Acorn, function (star, acorn) {
+  // Check for star / acorn collisions
+  if (!helpers.intersected(
+      {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2},
+      {x: star.x - star.radius, y: star.y - star.radius, width: star.radius * 2, height: star.radius * 2})) {
     return;
   }
-  var rect = canvas.getBoundingClientRect();
-  mouseX = e.clientX - rect.left;
+  player.score += env.pointsPerHit * star.multiplier;
+  entities.explode(
+    function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1); },
+    acorn.x, acorn.y, 5, 8, 0);
+  entities.explode(
+    function (x, y, vx, vy) { return new Particle(x, y, 1, 'rgba(255, 218, 218, 0.8)', vx, vy, 0, env.gravity); },
+    acorn.x, acorn.y, Math.ceil(30 / star.multiplier), 6, 2);
+  star.die();
+  acorn.die();
 });
 
-document.addEventListener('keydown', function (e) {
-  if (e.which === 37 || e.which === 65) {
-    keysDown.left = true;
-  } else if (e.which === 39 || e.which === 68) {
-    keysDown.right = true;
-  } else if (e.which === 38 || e.which === 32 || e.which === 16 || e.which === 88 || e.which === 90) {
-    if (!e.repeat) {
-      keysDown.fired = true;
-    }
-  } else if (e.which === 40) {
-    // Ignore down key
-  } else {
+entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
+  // Check for bullet / acorn collisions
+  if (!helpers.intersected(
+      {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2},
+      {x: bullet.x - bullet.radius, y: bullet.y - bullet.radius, width: bullet.radius * 2, height: bullet.radius * 2})) {
     return;
   }
-
-  // Switch to keyboard controls when moving
-  if (e.which === 37 || e.which === 65 || e.which === 39 || e.which === 68) {
-    mouseX = null;
-  }
-
-  // Start new game if not currently playing
-  if (!player.playing) {
-    newGame();
-  }
-
-  if (e.target === document.body) {
-    e.preventDefault();
-    return false;
-  }
-});
-
-document.addEventListener('keyup', function (e) {
-  if (e.which === 37 || e.which === 65) {
-    keysDown.left = false;
-  } else if (e.which === 39 || e.which === 68) {
-    keysDown.right = false;
-  }
+  player.score += env.pointsPerHit;
+  entities.explode(
+    function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2); },
+    acorn.x, acorn.y, 5, 8, 0);
+  entities.explode(
+    function (x, y, vx, vy) { return new Particle(x, y, 1, 'rgba(255, 218, 218, 0.8)', vx, vy, 0, env.gravity); },
+    acorn.x, acorn.y, 30, 6, 2);
+  bullet.die();
+  acorn.die();
 });
 
 game.click(function (e) {
-  var rect = canvas.getBoundingClientRect();
-  mouseX = e.clientX - rect.left;
-
-  keysDown.fired = true;
-
-  // Prevent unintentional game starts
-  if (startLock > 0) {
-    return;
-  }
-
-  // Create new player, if not currently playing
-  if (!player.playing) {
-    newGame();
-    return false;
-  }
-
-  // TODO: action
+  return entities.click(e);
 });
+
+// TODO: controller entity
 
 game.update(function (t) {
   // Show start message and adjust click lock
   showClickToStart = !player.playing && ((t % 120 > 5 && t % 120 < 20) || t % 120 > 25);
-  if (startLock > 0) {
-    startLock -= 1;
-  }
-
-  // Update total play-time
-  if (player.playing) {
-    player.playTime += 1;
-  }
-
-  // Update bullets
-  for (var b = 0; b < bullets.length; b++) {
-    bullets[b].y -= bullets[b].s;
-    bullets[b].angle += bullets[b].rotation;
-    // Delete bullet when out of bounds
-    if (bullets[b].y + bullets[b].r < 0) {
-      bullets.splice(b, 1);
-      b--;
-    }
-  }
-
-  // Update stars
-  for (var s = 0; s < stars.length; s++) {
-    stars[s].x += stars[s].vx;
-    stars[s].y += stars[s].vy;
-    stars[s].angle += stars[s].rotation;
-    stars[s].energy -= 1;
-    // Delete stars when out of energy
-    if (stars[s].energy <= 0) {
-      stars.splice(s, 1);
-      s--;
-    }
-  }
-
-  // Update player position
-  if (mouseX !== null) {
-    if (mouseX < player.x) {
-      player.x = helpers.clamp(player.x - MOUSE_SPEED, Math.max(player.r + 2, mouseX), game.width - player.r - 2);
-    } else if (mouseX > player.x) {
-      player.x = helpers.clamp(player.x + MOUSE_SPEED, player.r + 2, Math.min(game.width - player.r - 2, mouseX));
-    }
-  } else {
-    var x = player.x;
-    if (keysDown.left) {
-      x -= KEYBOARD_SPEED;
-    }
-    if (keysDown.right) {
-      x += KEYBOARD_SPEED;
-    }
-    player.x = helpers.clamp(x, player.r + 2, game.width - player.r - 2);
-  }
-
-  // Fire
-  if (keysDown.fired) {
-    keysDown.fired = false;
-    // Limit bullet count
-    if (bullets.length < MAX_BULLETS) {
-      bullets.push({
-        x: player.x,
-        y: player.y - player.r - 10,
-        r: player.r,
-        s: BULLET_SPEED,
-        angle: -0.3,
-        rotation: 0.1
-      });
-    }
-  }
-
-  // Adjust player personality
-  player.move = t % 8 >= 4;
-  player.blinkFor = Math.max(0, player.blinkFor - 1);
-  player.blinkNext = Math.max(0, player.blinkNext - 1);
-  if (player.blinkNext === 0) {
-    player.blinkFor = 5;
-    player.blinkNext = player.blinkDelay;
-  }
-
-  // Update particles
-  for (var p = 0; p < particles.length; p++) {
-    if (particles[p].ay) {
-      particles[p].vy += particles[p].ay;
-    }
-    particles[p].x += particles[p].vx;
-    particles[p].y += particles[p].vy;
-    // Delete particle when out of bounds
-    if (particles[p].x + particles[p].r < -PARTICLE_MARGIN || particles[p].x - particles[p].r > game.width + PARTICLE_MARGIN ||
-        particles[p].y + particles[p].r < -PARTICLE_MARGIN || particles[p].y - particles[p].r > game.height + PARTICLE_MARGIN) {
-      particles.splice(p, 1);
-      p--;
-    }
-  }
-
-  // Update acorns
-  for (var a = 0; a < acorns.length; a++) {
-    acorns[a].x += acorns[a].vx;
-    if (acorns[a].x + acorns[a].r > game.width && acorns[a].vx > 0 ||
-        acorns[a].x - acorns[a].r < 0 && acorns[a].vx < 0) {
-      acorns[a].vx = -acorns[a].vx;
-    }
-    acorns[a].y += acorns[a].vy;
-    acorns[a].vy += GRAVITY;
-    if (acorns[a].y > player.y - acorns[a].r && acorns[a].vy > 0) {
-      acorns[a].vy = Math.min(-acorns[a].vy * 0.8, -6);
-    }
-    acorns[a].angle += acorns[a].rotation;
-    if (acorns[a].angle < -0.3 && acorns[a].rotation < 0 ||
-        acorns[a].angle > 0.3 && acorns[a].rotation > 0) {
-      acorns[a].rotation = -acorns[a].rotation;
-    }
+  if (player.startLock > 0) {
+    player.startLock -= 1;
   }
 
   // Spawn acorn
-  // TODO: Base this off of difficulty?
-  // TODO: Base this off of enemies on-screen?
-  if (player.playing && player.playTime % ACORN_SPAWN_TIME === 0 && acorns.length < MAX_ACORNS) {
-    newAcorn();
+  // TODO: Base this off of difficulty or number of acorns currently in play?
+  if (player.playing && player.playTime % env.acornSpawnTime === 0 && acornCount < env.maxAcorns) {
+    var acorn = new Acorn();
+    acorn.entered(function () { acornCount += 1; });
+    acorn.exited(function () { acornCount -= 1; });
+    entities.push(acorn);
   }
 
-  // Check for bullet / acorn collisions
-  for (b = 0; b < bullets.length; b++) {
-    for (a = 0; a < acorns.length; a++) {
-      if (helpers.intersected(
-          {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
-          {x: bullets[b].x - bullets[b].r, y: bullets[b].y - bullets[b].r, width: bullets[b].r * 2, height: bullets[b].r * 2})) {
-        player.score += POINTS_PER_HIT;
-        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)', ay: GRAVITY}, 30, 6, 2);
-        helpers.explode(stars, acorns[a], {r: 10, energy: 15, angle: 0, rotation: -0.3, multiplier: 2}, 5, 8, 0);
-        bullets.splice(b, 1);
-        b--;
-        acorns.splice(a, 1);
-        a--;
-        break;
-      }
-    }
-  }
-
-  // Check for star / acorn collisions
-  for (s = 0; s < stars.length; s++) {
-    for (a = 0; a < acorns.length; a++) {
-      if (helpers.intersected(
-          {x: acorns[a].x - acorns[a].r, y: acorns[a].y - acorns[a].r, width: acorns[a].r * 2, height: acorns[a].r * 2},
-          {x: stars[s].x - stars[s].r, y: stars[s].y - stars[s].r, width: stars[s].r * 2, height: stars[s].r * 2})) {
-        player.score += POINTS_PER_HIT * stars[s].multiplier;
-        helpers.explode(particles, acorns[a], {r: 1, color: 'rgba(255, 218, 218, 0.8)', ay: GRAVITY}, Math.ceil(30 / stars[s].multiplier), 6, 2);
-        helpers.explode(stars, acorns[a], {r: 10, energy: 20, angle: 0, rotation: -0.3, multiplier: stars[s].multiplier}, 5, 8, 0);
-        stars.splice(s, 1);
-        s--;
-        acorns.splice(a, 1);
-        a--;
-        break;
-      }
-    }
-  }
-
-  // Update score
-  player.displayedScoreDelay = Math.max(player.displayedScoreDelay - 1, 0);
-  if (player.displayedScore < player.score && player.displayedScoreDelay === 0) {
-    player.displayedScore = Math.min(player.displayedScore + 10, player.score);
-    player.displayedScoreDelay = 3;
-  }
+  entities.update(t);
 });
 
 game.render(function (ctx) {
@@ -308,70 +88,7 @@ game.render(function (ctx) {
   ctx.fillStyle = '#4A913C';
   ctx.fillRect(0, 0, game.width, game.height);
 
-  // Draw bullets
-  for (var b = 0; b < bullets.length; b++) {
-    helpers.rotated(ctx, bullets[b].x, bullets[b].y, bullets[b].angle, function (x, y) {
-      helpers.fillStar(ctx, x, y, 5, bullets[b].r, bullets[b].r / 2, '#ff4');
-    });
-  }
-
-  // Draw stars
-  for (var s = 0; s < stars.length; s++) {
-    helpers.rotated(ctx, stars[s].x, stars[s].y, stars[s].angle, function (x, y) {
-      helpers.fillStar(ctx, x, y, 5, stars[s].r, stars[s].r / 2, '#EF7800');
-    });
-  }
-
-  // Draw player
-  if (player.playing) {
-    ctx.fillStyle = player.color;
-    helpers.fillCircle(ctx, player.x, player.y, player.r, player.color);
-    ctx.fillStyle = '#cc0';
-    if (player.blinkFor > 0) {
-      ctx.fillRect(player.x - 4 - 2, player.y - 7, 4, 1);
-      ctx.fillRect(player.x + 4 - 2, player.y - 7, 4, 1);
-    } else {
-      helpers.fillCircle(ctx, player.x - 4, player.y - 6, 1);
-      helpers.fillCircle(ctx, player.x + 4, player.y - 6, 1);
-    }
-    ctx.fillStyle = player.color;
-    // Neck
-    ctx.fillRect(player.x - 4, player.y - 16, 8, 6);
-    // Mandible
-    var moveMandibleBy = player.move ? 0 : 1;
-    helpers.scaled(ctx, player.x, player.y - 14 - moveMandibleBy, 1, 0.65, function (x, y) {
-      helpers.fillCircle(ctx, x, y, 6, player.color, Math.PI, 0);
-    });
-    // Legs
-    var moveLegsBy = player.move ? 0 : 0.3;
-    helpers.fillRotatedRect(ctx, Math.PI + 0.3 + moveLegsBy, player.x - 10, player.y - 6, 8, 2, player.color);
-    helpers.fillRotatedRect(ctx, Math.PI + 0.1 + moveLegsBy, player.x - 12, player.y, 8, 2, player.color);
-    helpers.fillRotatedRect(ctx, Math.PI + -0.1 - moveLegsBy, player.x - 11, player.y + 5, 8, 2, player.color);
-    helpers.fillRotatedRect(ctx, -0.3 - moveLegsBy, player.x + 9, player.y - 8, 8, 2, player.color);
-    helpers.fillRotatedRect(ctx, -0.1 - moveLegsBy, player.x + 11, player.y - 2, 8, 2, player.color);
-    helpers.fillRotatedRect(ctx, 0.1 + moveLegsBy, player.x + 11, player.y + 4, 8, 2, player.color);
-  }
-
-  // Draw acorns
-  for (var a = 0; a < acorns.length; a++) {
-    helpers.rotated(ctx, acorns[a].x, acorns[a].y, acorns[a].angle + 0.3, function (x, y) {
-      helpers.scaled(ctx, x, y, 0.85, 1, function (x, y) {
-        ctx.fillStyle = '#FFDA96';  // #fc3
-        helpers.fillCircle(ctx, x, y, acorns[a].r);
-        helpers.fillCircle(ctx, x, y + acorns[a].r - (acorns[a].r / 8), acorns[a].r / 4);
-        ctx.fillStyle = '#492F25';
-        helpers.scaled(ctx, x, y - 14, 1, 0.65, function (x, y) {
-          helpers.fillCircle(ctx, x, y + (acorns[a].r / 2), acorns[a].r, null, Math.PI, 0);
-        });
-        helpers.fillCircle(ctx, x, y - acorns[a].r - (acorns[a].r / 8), acorns[a].r / 4);
-      });
-    });
-  }
-
-  // Draw particles
-  for (var p = 0; p < particles.length; p++) {
-    helpers.fillCircle(ctx, particles[p].x, particles[p].y, particles[p].r, particles[p].color);
-  }
+  entities.render(ctx);
 
   // Draw pre-game text
   if (!player.playing) {

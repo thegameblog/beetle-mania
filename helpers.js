@@ -89,24 +89,6 @@ var helpers = {
       rect1.x + rect1.width > rect2.x &&
       rect1.y < rect2.y + rect2.height &&
       rect1.height + rect1.y > rect2.y);
-  },
-  explode: function (particles, origin, values, intensity, power, powerVariance) {
-    intensity = intensity || 100;
-    power = power || 15;
-    powerVariance = (powerVariance || powerVariance === 0) ? powerVariance : 5;
-    var minVelocity = Math.max(0, power - powerVariance);
-    var maxVelocity = Math.max(0, power + powerVariance);
-    for (var index = 0; index < intensity; index++) {
-      var angle = helpers.randInt(0, 360);
-      var velocity = helpers.randInt(minVelocity, maxVelocity);
-      var particle = extend({
-        x: origin.x,
-        y: origin.y,
-        vx: Math.cos(angle * Math.PI / 180) * velocity,
-        vy: Math.sin(angle * Math.PI / 180) * velocity
-      }, values);
-      particles.push(particle);
-    }
   }
 };
 
