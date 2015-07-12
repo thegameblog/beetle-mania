@@ -1,14 +1,12 @@
 var Gesso = require('gesso');
 var Group = require('gesso-entity').Group;
-var Player = require('./player');
-var sprites = require('./sprites');
-var helpers = require('./helpers');
 var env = require('../package.json').game;
-
-var Bullet = sprites.Bullet;
-var Star = sprites.Star;
-var Acorn = sprites.Acorn;
-var Particle = sprites.Particle;
+var Player = require('./player');
+var Acorn = require('./acorn');
+var Bullet = require('./bullet');
+var Particle = require('./particle');
+var Star = require('./star');
+var helpers = require('./helpers');
 
 var game = new Gesso();
 var entities = new Group(game);
