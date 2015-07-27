@@ -7,16 +7,17 @@ module.exports = Entity.extend({
   color: '#EF7800',
   energy: 15,
 
-  init: function (x, y, vx, vy, multiplier) {
+  init: function (x, y, vx, vy, multiplier, textEffect) {
     Entity.prototype.init.call(this);
     this.x = x;
     this.y = y;
     this.vx = vx;
     this.vy = vy;
     this.energy = this.energy;
-    this.multiplier = multiplier;
+    this.multiplier = multiplier || 1;
     this.angle = 0;
     this.rotation = -0.3;
+    this.textEffect = textEffect || null;
   },
 
   update: function (t, remove) {

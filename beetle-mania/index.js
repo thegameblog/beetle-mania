@@ -5,6 +5,7 @@ var Player = require('./player');
 var Acorn = require('./acorn');
 var Bullet = require('./bullet');
 var Particle = require('./particle');
+var TextEffect = require('./text-effect');
 var Star = require('./star');
 var helpers = require('./helpers');
 
@@ -25,9 +26,11 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
       {x: star.x - star.radius, y: star.y - star.radius, width: star.radius * 2, height: star.radius * 2})) {
     return;
   }
-  player.score += env.pointsPerHit * star.multiplier;
+  // Resurrect textEffect if not alive?
+  star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
+  player.score += env.pointsPerHit * star.textEffect.multiple;
   entities.explode(
-    function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1); },
+    function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1, star.textEffect); },
     acorn.x, acorn.y, 5, 8, 0);
   entities.explode(
     function (x, y, vx, vy) { return new Particle(x, y, 1, 'rgba(255, 218, 218, 0.8)', vx, vy, 0, env.gravity); },
@@ -43,8 +46,10 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
     return;
   }
   player.score += env.pointsPerHit;
+  textEffect = new TextEffect(acorn.x, acorn.y, 1);
+  entities.push(textEffect);
   entities.explode(
-    function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2); },
+    function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2, textEffect); },
     acorn.x, acorn.y, 5, 8, 0);
   entities.explode(
     function (x, y, vx, vy) { return new Particle(x, y, 1, 'rgba(255, 218, 218, 0.8)', vx, vy, 0, env.gravity); },

@@ -111,7 +111,7 @@ var Player = Entity.extend({
     this.displayedScoreDelay = Math.max(this.displayedScoreDelay - 1, 0);
     if (this.displayedScore < this.score && this.displayedScoreDelay === 0) {
       this.displayedScore = Math.min(this.displayedScore + 10, this.score);
-      this.displayedScoreDelay = 3;
+      this.displayedScoreDelay = 2;
     }
 
     // Adjust personality
