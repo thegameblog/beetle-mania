@@ -46,7 +46,7 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
     return;
   }
   player.score += env.pointsPerHit;
-  textEffect = new TextEffect(acorn.x, acorn.y, 1);
+  var textEffect = new TextEffect(acorn.x, acorn.y, 1);
   entities.push(textEffect);
   entities.explode(
     function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2, textEffect); },
