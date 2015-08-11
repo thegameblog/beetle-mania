@@ -103,8 +103,8 @@ game.render(function (ctx) {
         helpers.outlineText(ctx, 'Click to start!', game.width / 2, game.height / 2, '#333', '#fff');
       }
     }
-    ctx.font = 'bold 16px sans-serif';
-    helpers.outlineText(ctx, 'Or press \u25c2 \u25B8', game.width - 60, game.height - 10, '#333', '#fff');
+    ctx.font = 'bold 28px sans-serif';
+    helpers.outlineText(ctx, 'Or press \u25c2 \u25B8', game.width - 95, game.height - 20, '#333', '#fff');
   }
 
   // Draw score
