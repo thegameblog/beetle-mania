@@ -2,6 +2,7 @@ var Gesso = require('gesso');
 var Group = require('gesso-entity').Group;
 var env = require('../package.json').game;
 var Player = require('./player');
+var Background = require('./background');
 var Acorn = require('./acorn');
 var Bullet = require('./bullet');
 var Particle = require('./particle');
@@ -12,11 +13,13 @@ var helpers = require('./helpers');
 var game = new Gesso();
 var entities = new Group(game);
 var player = new Player();
+var background = new Background(player);
 var showClickToStart = false;
 var acornCount = 0;
 
-// Add player
+// Add initial entities
 entities.push(player);
+entities.push(background);
 
 // Add interactions
 entities.pushInteraction(Star, Acorn, function (star, acorn) {
@@ -30,6 +33,7 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
   star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
   player.score += env.pointsPerHit * star.textEffect.multiple;
   entities.explode(
+    // TODO: Cap the multiplier? Better sound effect after X?
     function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1, star.textEffect); },
     acorn.x, acorn.y, 5, 8, 0);
   entities.explode(
@@ -85,10 +89,6 @@ game.update(function (t) {
 
 game.render(function (ctx) {
   ctx.save();
-
-  // Draw background
-  ctx.fillStyle = '#4A913C';
-  ctx.fillRect(0, 0, game.width, game.height);
 
   entities.render(ctx);
 
