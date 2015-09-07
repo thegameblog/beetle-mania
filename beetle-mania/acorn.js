@@ -5,6 +5,7 @@ var helpers = require('./helpers');
 module.exports = Entity.extend({
   zindex: 4,
   radius: 16,
+  bounce: 0.9,
   acornHeadColor: '#FFDA96',  // #fc3
   acornBodyColor: '#492F25',
 
@@ -33,7 +34,7 @@ module.exports = Entity.extend({
     this.y += this.vy;
     this.vy += env.gravity;
     if (this.y > this.ground - this.radius && this.vy > 0) {
-      this.vy = Math.min(-this.vy * 0.8, -6);
+      this.vy = Math.min(-this.vy * this.bounce, -6);
     }
     this.angle += this.rotation;
     if (this.angle < -0.3 && this.rotation < 0 ||
