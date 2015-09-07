@@ -6,7 +6,6 @@ var Player = require('./player');
 var Background = require('./background');
 var Acorn = require('./acorn');
 var Bullet = require('./bullet');
-var Particle = require('./particle');
 var TextEffect = require('./text-effect');
 var Star = require('./star');
 var helpers = require('./helpers');
@@ -52,9 +51,6 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
     // TODO: Cap the multiplier? Better sound effect after X?
     function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1, star.textEffect); },
     acorn.x, acorn.y, 5, 8, 0);
-  entities.explode(
-    function (x, y, vx, vy) { return new Particle(x, y, 1, 'rgba(255, 218, 218, 0.8)', vx, vy, 0, env.gravity); },
-    acorn.x, acorn.y, Math.ceil(30 / star.multiplier), 6, 2);
   star.die();
   acorn.die();
 });
@@ -72,9 +68,6 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
   entities.explode(
     function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2, textEffect); },
     acorn.x, acorn.y, 5, 8, 0);
-  entities.explode(
-    function (x, y, vx, vy) { return new Particle(x, y, 1, 'rgba(255, 218, 218, 0.8)', vx, vy, 0, env.gravity); },
-    acorn.x, acorn.y, 30, 6, 2);
   bullet.die();
   acorn.die();
   hitSound.play();
