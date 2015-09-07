@@ -2,8 +2,12 @@ var helpers = {
   clamp: function (value, min, max) {
     return Math.min(Math.max(value, min), max);
   },
-  randInt: function (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  randInt: function (min, max, includeNegatives) {
+    var value = Math.floor(Math.random() * (max - min + 1)) + min;
+    if (includeNegatives && helpers.randInt(0, 1) == 1) {
+      value = -value;
+    }
+    return value;
   },
   scaled: function (ctx, x, y, scaleX, scaleY, cb) {
     ctx.translate(x, y);

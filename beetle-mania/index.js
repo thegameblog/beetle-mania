@@ -16,6 +16,9 @@ var player = new Player();
 var background = new Background(player);
 var showClickToStart = false;
 var acornCount = 0;
+var shakeCount = 0;
+var shakeOffsetX = 0;
+var shakeOffsetY = 0;
 
 // Add initial entities
 entities.push(player);
@@ -29,6 +32,8 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
       {x: star.x - star.radius, y: star.y - star.radius, width: star.radius * 2, height: star.radius * 2})) {
     return;
   }
+  // Shake
+  shakeCount = 10;
   // Resurrect textEffect if not alive?
   star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
   player.score += env.pointsPerHit * star.textEffect.multiple;
@@ -49,6 +54,7 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
       {x: bullet.x - bullet.radius, y: bullet.y - bullet.radius, width: bullet.radius * 2, height: bullet.radius * 2})) {
     return;
   }
+  shakeCount += 1;
   player.score += env.pointsPerHit;
   var textEffect = new TextEffect(acorn.x, acorn.y, 1);
   entities.push(textEffect);
@@ -75,6 +81,15 @@ game.update(function (t) {
     player.startLock -= 1;
   }
 
+  if (shakeCount > 0) {
+    shakeCount -= 1;
+    shakeOffsetX = helpers.randInt(2, 4, true);
+    shakeOffsetY = helpers.randInt(2, 4, true);
+  } else {
+    shakeOffsetX = 0;
+    shakeOffsetY = 0;
+  }
+
   // Spawn acorn
   // TODO: Base this off of difficulty or number of acorns currently in play?
   if (player.playing && player.playTime % env.acornSpawnTime === 0 && acornCount < env.maxAcorns) {
@@ -89,6 +104,11 @@ game.update(function (t) {
 
 game.render(function (ctx) {
   ctx.save();
+
+  // Shake screen
+  if (shakeOffsetX || shakeOffsetY) {
+    ctx.translate(shakeOffsetX, shakeOffsetY);
+  }
 
   entities.render(ctx);
 
