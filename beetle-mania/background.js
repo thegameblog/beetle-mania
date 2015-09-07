@@ -82,8 +82,8 @@ module.exports = Entity.extend({
     this.nextOpening -= 1;
     if (this.nextOpening <= 0) {
       var r = randInt(10, 30);
-      this.group.push(new Opening(0.3, this.game.width + r, randInt(0, 250), r, r, '#80B276'));
-      this.nextOpening = randInt(200, 600);
+      this.group.push(new Opening(0.3, this.game.width + r, randInt(0, 350), r, r, '#80B276'));
+      this.nextOpening = randInt(200, 400);
     }
   },
 
