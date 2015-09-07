@@ -2,6 +2,7 @@
 
 var Gesso = require('gesso');
 var Entity = require('gesso-entity').Entity;
+var Howl = require('howler').Howl;
 var env = require('../package.json').game;
 var Bullet = require('./bullet');
 var helpers = require('./helpers');
@@ -14,6 +15,7 @@ var keysDown = {left: false, right: false};
 
 var Player = Entity.extend({
   zindex: 3,
+  shootSound: null,
 
   init: function (player) {
     Entity.prototype.init.call(this);
@@ -34,6 +36,7 @@ var Player = Entity.extend({
 
   enter: function () {
     this.y = this.game.height - 30;
+    this.shootSound = new Howl({urls: [this.game.asset('fire.wav')]});
   },
 
   start: function () {
@@ -103,6 +106,7 @@ var Player = Entity.extend({
         var bullet = new Bullet(this.x, this.y - this.radius - 10);
         bullet.entered(function () { bulletCount += 1; });
         bullet.exited(function () { bulletCount -= 1; });
+        this.shootSound.play();
         this.group.push(bullet);
       }
     }

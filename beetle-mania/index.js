@@ -1,5 +1,6 @@
 var Gesso = require('gesso');
 var Group = require('gesso-entity').Group;
+var Howl = require('howler').Howl;
 var env = require('../package.json').game;
 var Player = require('./player');
 var Background = require('./background');
@@ -14,6 +15,9 @@ var game = new Gesso();
 var entities = new Group(game);
 var player = new Player();
 var background = new Background(player);
+var hitSound = new Howl({urls: [game.asset('hit.wav')]});
+var superHitSound = new Howl({urls: [game.asset('super-hit.wav')]});
+var bestHitSound = new Howl({urls: [game.asset('best-hit.wav')]});
 var showClickToStart = false;
 var acornCount = 0;
 var shakeCount = 0;
@@ -37,6 +41,13 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
   // Resurrect textEffect if not alive?
   star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
   player.score += env.pointsPerHit * star.textEffect.multiple;
+  if (star.textEffect.multiple >= env.maxAcorns * 0.8) {
+    bestHitSound.play();
+  } else if (star.textEffect.multiple >= env.maxAcorns * 0.4) {
+    superHitSound.play();
+  } else {
+    hitSound.play();
+  }
   entities.explode(
     // TODO: Cap the multiplier? Better sound effect after X?
     function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1, star.textEffect); },
@@ -66,6 +77,7 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
     acorn.x, acorn.y, 30, 6, 2);
   bullet.die();
   acorn.die();
+  hitSound.play();
 });
 
 game.click(function (e) {
