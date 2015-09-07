@@ -1,5 +1,6 @@
 var randInt = require('./helpers').randInt;
 var Entity = require('gesso-entity').Entity;
+var helpers = require('./helpers');
 
 var Block = Entity.extend({
   init: function (s, x, y, width, height, color, capColor) {
@@ -21,12 +22,21 @@ var Block = Entity.extend({
   },
 
   render: function (ctx) {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-
     if (this.capColor) {
+      ctx.fillStyle = this.color;
+      ctx.fillRect(this.x, this.y, this.width, this.height);
       ctx.fillStyle = this.capColor;
       ctx.fillRect(this.x, this.y, this.width, 4);
+    } else {
+      var radius = this.width;
+      ctx.fillStyle = this.color;
+      helpers.rotated(ctx, this.x, this.y, 0.8, function (x, y) {
+        ctx.fillRect(x - radius / 2, y - radius / 2, radius, radius);
+        helpers.fillCircle(ctx, x - radius, y, radius / 1.5, '#4A913C');
+        helpers.fillCircle(ctx, x + radius, y, radius / 1.5, '#4A913C');
+        helpers.fillCircle(ctx, x, y - radius, radius / 1.5, '#4A913C');
+        helpers.fillCircle(ctx, x, y + radius, radius / 1.5, '#4A913C');
+      });
     }
   }
 });
@@ -39,7 +49,7 @@ var Hill = Block.extend({
   }
 });
 
-var Cloud = Block.extend({
+var Opening = Block.extend({
   zindex: -2,
 
   init: function (s, x, y, width, height, color) {
@@ -51,7 +61,7 @@ module.exports = Entity.extend({
   player: null,
   zindex: -3,
   nextHill: 50,
-  nextCloud: 20,
+  nextOpening: 20,
 
   init: function (player) {
     Entity.prototype.init.call(this);
@@ -65,16 +75,15 @@ module.exports = Entity.extend({
       var y = randInt(150, 400);
       var width = randInt(100, 250);
       var height = 420 - y;
-      // '#9EB656'  // 'rgba(200, 200, 100, 0.3)'
       this.group.push(new Hill(0.7, x, y, width, height, '#70A248', '#9EB656'));
       this.nextHill = randInt(width / 2, 600);
     }
 
-    this.nextCloud -= 1;
-    if (this.nextCloud <= 0) {
+    this.nextOpening -= 1;
+    if (this.nextOpening <= 0) {
       var r = randInt(10, 30);
-      this.group.push(new Cloud(0.3, this.game.width, randInt(0, 250), r, r, '#80B276'));
-      this.nextCloud = randInt(200, 600);
+      this.group.push(new Opening(0.3, this.game.width + r, randInt(0, 250), r, r, '#80B276'));
+      this.nextOpening = randInt(200, 600);
     }
   },
 
