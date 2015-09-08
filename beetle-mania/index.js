@@ -15,7 +15,6 @@ var entities = new Group(game);
 var player = new Player();
 var background = new Background(player);
 var hitSound = new Howl({urls: [game.asset('hit.wav')]});
-var superHitSound = new Howl({urls: [game.asset('super-hit.wav')]});
 var bestHitSound = new Howl({urls: [game.asset('best-hit.wav')]});
 var showClickToStart = false;
 var acornCount = 0;
@@ -42,8 +41,6 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
   player.score += env.pointsPerHit * star.textEffect.multiple;
   if (star.textEffect.multiple >= env.maxAcorns * 0.8) {
     bestHitSound.play();
-  } else if (star.textEffect.multiple >= env.maxAcorns * 0.4) {
-    superHitSound.play();
   } else {
     hitSound.play();
   }
