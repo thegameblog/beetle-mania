@@ -26,6 +26,18 @@ var shakeOffsetY = 0;
 entities.push(player);
 entities.push(background);
 
+// Callbacks
+entities.entered(function (entity) {
+  if (entity.constructor === Acorn) {
+    acornCount += 1;
+  }
+});
+entities.exited(function (entity) {
+  if (entity.constructor === Acorn) {
+    acornCount -= 1;
+  }
+});
+
 // Add interactions
 entities.pushInteraction(Star, Acorn, function (star, acorn) {
   // Check for star / acorn collisions
@@ -95,10 +107,7 @@ game.update(function (t) {
   // Spawn acorn
   // TODO: Base this off of difficulty or number of acorns currently in play?
   if (player.playing && player.playTime % env.acornSpawnTime === 0 && acornCount < env.maxAcorns) {
-    var acorn = new Acorn();
-    acorn.entered(function () { acornCount += 1; });
-    acorn.exited(function () { acornCount -= 1; });
-    entities.push(acorn);
+    entities.push(new Acorn());
   }
 
   entities.update(t);
