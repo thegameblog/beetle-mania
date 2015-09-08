@@ -114,7 +114,8 @@ var Player = Entity.extend({
     // Update score
     this.displayedScoreDelay = Math.max(this.displayedScoreDelay - 1, 0);
     if (this.displayedScore < this.score && this.displayedScoreDelay === 0) {
-      this.displayedScore = Math.min(this.displayedScore + 10, this.score);
+      var multiple = this.score - this.displayedScore > 10000 ? 1111 : (this.score - this.displayedScore > 1000 ? 111 : 11);
+      this.displayedScore = Math.min(this.displayedScore + multiple, this.score);
       this.displayedScoreDelay = 2;
     }
 
