@@ -6,7 +6,7 @@ module.exports = Entity.extend({
   zindex: 4,
   radius: 16,
   bounce: 0.9,
-  acornHeadColor: '#FFDA96',  // #fc3
+  acornHeadColor: '#FFDA96',
   acornBodyColor: '#492F25',
 
   init: function () {
