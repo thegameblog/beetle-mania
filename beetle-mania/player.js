@@ -19,7 +19,6 @@ var Player = Entity.extend({
   radius: 12,
   color: '#000',
   knockedoutColor: '#300',
-  shootSound: null,
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
 
@@ -28,6 +27,8 @@ var Player = Entity.extend({
     this.startLock = 0;
     this.playing = false;
     this.playTime = 0;
+    this.shootSound = null;
+    this.knockedoutSound = null;
     this.knockedout = false;
     this.knockedoutTime = 0;
     this.knockedoutMaxTime = 0;
@@ -48,6 +49,7 @@ var Player = Entity.extend({
   enter: function () {
     this.y = this.game.height - 30;
     this.shootSound = new Howl({urls: [this.game.asset('fire.wav')]});
+    this.knockedoutSound = new Howl({urls: [this.game.asset('knockedout.wav')]});
   },
 
   start: function () {
@@ -94,6 +96,7 @@ var Player = Entity.extend({
     this.knockedoutTime = 0;
     this.knockedout = true;
     wakeUpSignal = false;
+    this.knockedoutSound.play();
   },
 
   update: function (t) {
