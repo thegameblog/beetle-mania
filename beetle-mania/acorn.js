@@ -46,6 +46,7 @@ module.exports = Entity.extend({
   render: function (ctx) {
     var self = this;
     helpers.rotated(ctx, this.x, this.y, this.angle + 0.3, function (x, y) {
+      // TODO: Use an image
       helpers.scaled(ctx, x, y, 0.85, 1, function (x, y) {
         ctx.fillStyle = self.acornHeadColor;
         helpers.fillCircle(ctx, x, y, self.radius);
