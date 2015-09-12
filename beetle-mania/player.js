@@ -89,7 +89,6 @@ var Player = Entity.extend({
       this.highScoreTime = this.highScoreMaxTime;
     }
     this.score = 0;
-    this.displayedScore = 0;
     this.displayedScoreDelay = 0;
     this.group.forEachType(Acorn, function (acorn) {
       acorn.bouncy = false;

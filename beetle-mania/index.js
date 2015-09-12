@@ -182,31 +182,26 @@ game.render(function (ctx) {
   }
 
   // Draw score
-  if (player.playing) {
-    if (player.highScore) {
-      ctx.font = 'bold 20px sans-serif';
-      ctx.textAlign = 'end';
-      helpers.outlineText(ctx, player.displayedScore, game.width / 2 - 8, 22, '#333', '#fff');
-      ctx.textAlign = 'start';
-      helpers.outlineText(ctx, player.highScore, game.width / 2 + 8, 22, '#333', '#fff');
-    } else {
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 20px sans-serif';
-      helpers.outlineText(ctx, player.displayedScore, game.width / 2, 22, '#333', '#fff');
-    }
-  } else if (player.highScore) {
-    ctx.textAlign = 'center';
+  if (player.highScore) {
     ctx.font = 'bold 20px sans-serif';
-    helpers.outlineText(ctx, 'High Score', game.width / 2, 22, '#333', '#fff');
-    helpers.outlineText(ctx, player.highScore, game.width / 2, 51, '#333', '#fff');
+    ctx.textAlign = 'end';
+    helpers.outlineText(ctx, player.displayedScore, game.width / 2 - 8, 22, '#333', '#fff');
+    ctx.textAlign = 'start';
+    helpers.outlineText(ctx, player.highScore, game.width / 2 + 8, 22, '#333', '#fff');
     if (player.highScoreTime > 0) {
+      ctx.textAlign = 'center';
       var offset = player.highScoreTime * 2;
       var fade = player.highScoreTime / player.highScoreMaxTime * 2;
       ctx.font = 'bold ' + (24 + offset) + 'px sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, ' + fade + ')';
       ctx.fillText(player.highScore, game.width / 2, 64 + (offset * 1.5));
     }
+  } else {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px sans-serif';
+    helpers.outlineText(ctx, player.displayedScore, game.width / 2, 22, '#333', '#fff');
   }
+
 
   ctx.restore();
 });
