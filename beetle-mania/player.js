@@ -312,7 +312,7 @@ document.addEventListener('keydown', function (e) {
     keysDown.left = true;
   } else if (e.which === 39 || e.which === 68) {
     keysDown.right = true;
-  } else if (e.which === 38 || e.which === 32 || e.which === 16 || e.which === 88 || e.which === 90) {
+  } else if (e.which === 83 || e.which === 38 || e.which === 32 || e.which === 190 || e.which === 191 || e.which === 88 || e.which === 90) {
     if (!e.repeat) {
       keysDown.fired = true;
       // Try to wake up signal if knocked out
