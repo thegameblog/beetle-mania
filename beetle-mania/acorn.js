@@ -19,6 +19,7 @@ module.exports = Entity.extend({
     this.ground = 0;
     this.angle = 0;
     this.rotation = 0.1;
+    this.bouncy = true;
   },
 
   enter: function () {
@@ -42,8 +43,11 @@ module.exports = Entity.extend({
     }
     this.y += this.vy;
     this.vy += env.gravity;
-    if (this.y > this.ground - this.radius && this.vy > 0) {
+    if (this.bouncy && this.y > this.ground - this.radius && this.vy > 0) {
       this.vy = Math.min(-this.vy * this.bounce, -6);
+    }
+    if (this.y > this.game.height + this.radius) {
+      this.die();
     }
     this.angle += this.rotation;
     if (this.angle < -0.3 && this.rotation < 0 ||

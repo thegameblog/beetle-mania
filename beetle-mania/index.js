@@ -5,9 +5,9 @@ var env = require('../package.json').game;
 var Player = require('./player');
 var Background = require('./background');
 var Acorn = require('./acorn');
+var Star = require('./star');
 var Bullet = require('./bullet');
 var TextEffect = require('./text-effect');
-var Star = require('./star');
 var helpers = require('./helpers');
 
 var game = new Gesso();
@@ -41,6 +41,10 @@ entities.exited(function (entity) {
 
 // Add interactions
 entities.pushInteraction(Star, Acorn, function (star, acorn) {
+  // Skip stars without a multiplier
+  if (!star.multiplier) {
+    return;
+  }
   // Check for star / acorn collisions
   if (!helpers.intersected(
       {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2},
@@ -80,7 +84,7 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
   hitSound.play();
 });
 entities.pushInteraction(Player, Acorn, function (player, acorn) {
-  if (!player.playing || player.knockedout) {
+  if (!player.playing || player.knockedout || player.exploding) {
     return;
   }
   // Check for player / acorn collision
@@ -137,12 +141,6 @@ game.update(function (t) {
   //     entities.push(new Acorn());
   //   }
   // }
-
-  if (!player.playing && !entities.containsType(Star)) {
-    entities.forEachType(Acorn, function (acorn) {
-      acorn.explode(0);
-    });
-  }
 
   entities.update(t);
 });

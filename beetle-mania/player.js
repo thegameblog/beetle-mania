@@ -4,7 +4,10 @@ var Gesso = require('gesso');
 var Entity = require('gesso-entity').Entity;
 var Howl = require('howler').Howl;
 var env = require('../package.json').game;
+var Acorn = require('./acorn');
+var Star = require('./star');
 var Bullet = require('./bullet');
+var TextEffect = require('./text-effect');
 var helpers = require('./helpers');
 
 var canvas = Gesso.getCanvas();
@@ -28,12 +31,13 @@ var Player = Entity.extend({
     this.startLock = 0;
     this.playing = false;
     this.playTime = 0;
+    this.exploding = false;
     this.shootSound = null;
     this.knockedoutSound = null;
     this.countupSound = null;
     this.knockedout = false;
     this.knockedoutNext = 0;
-    this.knockedoutMaxNext = 0;
+    this.knockedoutMaxNext = null;
     this.knockedoutCountdown = 0;
     this.strength = 100;
     this.score = 0;
@@ -41,12 +45,12 @@ var Player = Entity.extend({
     this.displayedScoreDelay = 0;
     this.highScore = 0;
     this.highScoreTime = 0;
-    this.highScoreMaxTime = 0;
+    this.highScoreMaxTime = null;
     this.x = 0;
     this.y = 0;
     this.blinkFor = 0;
     this.blinkNext = 0;
-    this.blinkDelay = 0;
+    this.blinkDelay = null;
   },
 
   enter: function () {
@@ -60,6 +64,7 @@ var Player = Entity.extend({
   start: function () {
     this.x = this.game.width / 2;
     this.playing = true;
+    this.exploding = false;
     this.playTime = 0;
     // TODO: newAcornGenerator()?
     this.score = 0;
@@ -69,11 +74,14 @@ var Player = Entity.extend({
     this.highScoreMaxTime = this.game.fps * this.highScoreMaxSeconds;
     this.blinkDelay = this.game.fps * this.blinkDelaySeconds;
     this.blinkNext = this.blinkDelay;
+    this.group.forEachType(Acorn, function (acorn) {
+      acorn.explode(0);
+    });
   },
 
   stop: function () {
     this.playing = false;
-    this.played = true;
+    this.exploding = false;
     this.startLock = 30;
     this.knockedout = false;
     if (this.score >= this.highScore) {
@@ -83,6 +91,13 @@ var Player = Entity.extend({
     this.score = 0;
     this.displayedScore = 0;
     this.displayedScoreDelay = 0;
+    this.group.forEachType(Acorn, function (acorn) {
+      acorn.bouncy = false;
+    });
+  },
+
+  explode: function () {
+    this.exploding = true;
   },
 
   click: function (e) {
@@ -132,7 +147,11 @@ var Player = Entity.extend({
         this.knockedoutNext = this.knockedoutMaxNext;
         this.knockedoutCountdown -= 1;
         if (this.knockedoutCountdown <= 0) {
-          this.stop();
+          var player = this;
+          this.group.explode(
+            function (x, y, vx, vy) { return new Star(player.x, player.y, vx, vy, 1, new TextEffect(player.x, player.y, 1)); },
+            this.x, this.y, 20, 10, 0);
+          this.explode();
           return;
         }
       }
@@ -153,6 +172,14 @@ var Player = Entity.extend({
 
     // Update total play-time
     this.playTime += 1;
+
+    // Update only when not exploding
+    if (this.exploding) {
+      if (this.displayedScore === this.score && !this.group.containsType(Star)) {
+        this.stop();
+      }
+      return;
+    }
 
     // Wake up from a knockout
     if (wakeUpSignal) {
@@ -213,7 +240,7 @@ var Player = Entity.extend({
 
   render: function (ctx) {
     // Render only when playing
-    if (!this.playing) {
+    if (!this.playing || this.exploding) {
       return;
     }
 
