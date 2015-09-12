@@ -31,6 +31,7 @@ var Player = Entity.extend({
     Entity.prototype.init.call(this);
     this.startLock = 0;
     this.playing = false;
+    this.played = false;
     this.playTime = 0;
     this.exploding = false;
     this.shootSound = null;
@@ -72,6 +73,7 @@ var Player = Entity.extend({
   start: function () {
     this.x = this.game.width / 2;
     this.playing = true;
+    this.played = true;
     this.exploding = false;
     this.playTime = 0;
     // TODO: newAcornGenerator()?
