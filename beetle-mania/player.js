@@ -35,6 +35,8 @@ var Player = Entity.extend({
     this.shootSound = null;
     this.knockedoutSound = null;
     this.countupSound = null;
+    this.highScoreSound = null;
+    this.gameOverSound = null;
     this.knockedout = false;
     this.knockedoutNext = 0;
     this.knockedoutMaxNext = null;
@@ -58,6 +60,8 @@ var Player = Entity.extend({
     this.shootSound = new Howl({urls: [this.game.asset('fire.wav')]});
     this.knockedoutSound = new Howl({urls: [this.game.asset('knockedout.wav')]});
     this.countupSound = new Howl({urls: [this.game.asset('countup.wav')]});
+    this.highScoreSound = new Howl({urls: [this.game.asset('high-score.wav')]});
+    this.gameOverSound = new Howl({urls: [this.game.asset('game-over.wav')]});
     this.knockedoutMaxNext = this.game.fps;
   },
 
@@ -87,6 +91,9 @@ var Player = Entity.extend({
     if (this.score >= this.highScore) {
       this.highScore = this.score;
       this.highScoreTime = this.highScoreMaxTime;
+      this.highScoreSound.play();
+    } else {
+      this.gameOverSound.play();
     }
     this.score = 0;
     this.displayedScoreDelay = 0;
