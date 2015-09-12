@@ -16,8 +16,12 @@ var player = new Player();
 var background = new Background(player);
 var hitSound = new Howl({urls: [game.asset('hit.wav')]});
 var bestHitSound = new Howl({urls: [game.asset('best-hit.wav')]});
+var countupSound = new Howl({urls: [game.asset('countup.wav')]});
 var showClickToStart = false;
 var showKnockedOutMessage = false;
+var countup = 0;
+var countupInt = 0;
+var lastCountupInt = 0;
 var acornCount = 0;
 var shakeCount = 0;
 var shakeOffsetX = 0;
@@ -98,6 +102,9 @@ entities.pushInteraction(Player, Acorn, function (player, acorn) {
       {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2})) {
     return;
   }
+  countup = 0;
+  countupInt = 0;
+  lastCountupInt = 0;
   player.knockOut();
   acorn.die();
 });
@@ -124,7 +131,16 @@ game.update(function (t) {
     shakeOffsetY = 0;
   }
 
+  // Knocked out mode
   showKnockedOutMessage = player.knockedout && (t % 10 > 2);
+  if (player.knockedout) {
+    countup = player.knockedoutTime / game.fps;
+    countupInt = Math.min(Math.floor(countup), 3);
+    if (lastCountupInt < countupInt) {
+      lastCountupInt = countupInt;
+      countupSound.play();
+    }
+  }
 
   // Spawn acorn if not knocked out
   if (!player.knockedout) {
@@ -183,10 +199,14 @@ game.render(function (ctx) {
     ctx.textAlign = 'center';
     ctx.font = 'bold 64px sans-serif';
     helpers.outlineText(ctx, 'Click!', game.width / 2, game.height / 2, '#333', '#fff');
+  }
+  if (player.playing && player.knockedout) {
     // Knocked out time
     ctx.textAlign = 'center';
-    ctx.font = 'bold 64px sans-serif';
-    helpers.outlineText(ctx, (player.knockedoutTime / this.fps), player.x, player.y - player.r - 12, '#333', '#fff');
+    ctx.font = 'bold 24px sans-serif';
+    if (countupInt && countup % 1 >= 0.2) {
+      helpers.outlineText(ctx, String(countupInt), player.x, player.y - player.radius - 20, '#333', '#fff');
+    }
   }
 
   // Draw score

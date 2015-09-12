@@ -19,6 +19,7 @@ var Player = Entity.extend({
   radius: 12,
   color: '#000',
   knockedoutColor: '#300',
+  knockedoutMaxSeconds: 4,
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
 
@@ -53,7 +54,7 @@ var Player = Entity.extend({
   },
 
   start: function () {
-    this.knockedoutMaxTime = this.game.fps * 3;
+    this.knockedoutMaxTime = this.game.fps * this.knockedoutMaxSeconds;
     this.x = this.game.width / 2;
     this.playing = true;
     this.playTime = 0;
