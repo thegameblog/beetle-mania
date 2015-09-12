@@ -1,5 +1,6 @@
 var Entity = require('gesso-entity').Entity;
 var env = require('../package.json').game;
+var Star = require('./star');
 var helpers = require('./helpers');
 
 module.exports = Entity.extend({
@@ -23,6 +24,14 @@ module.exports = Entity.extend({
   enter: function () {
     this.x = helpers.randInt(this.radius, this.game.width - this.radius);
     this.ground = this.game.height - 30;
+  },
+
+  explode: function (multiplier, textEffect) {
+    this.group.explode(
+      // TODO: Cap the multiplier? Better sound effect after X?
+      function (x, y, vx, vy) { return new Star(x, y, vx, vy, multiplier, textEffect); },
+      this.x, this.y, 5, 8, 0);
+    this.die();
   },
 
   update: function () {

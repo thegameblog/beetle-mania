@@ -39,14 +39,6 @@ entities.exited(function (entity) {
   }
 });
 
-function explodeAcorn(acorn, multiplier, textEffect) {
-  entities.explode(
-    // TODO: Cap the multiplier? Better sound effect after X?
-    function (x, y, vx, vy) { return new Star(x, y, vx, vy, multiplier, textEffect); },
-    acorn.x, acorn.y, 5, 8, 0);
-  acorn.die();
-}
-
 // Add interactions
 entities.pushInteraction(Star, Acorn, function (star, acorn) {
   // Check for star / acorn collisions
@@ -66,7 +58,7 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
     star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
     player.score += env.pointsPerHit * star.textEffect.multiple;
   }
-  explodeAcorn(acorn, star.multiplier + 1, star.textEffect);
+  acorn.explode(star.multiplier + 1, star.textEffect);
   star.die();
 });
 entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
@@ -148,7 +140,7 @@ game.update(function (t) {
 
   if (!player.playing && !entities.containsType(Star)) {
     entities.forEachType(Acorn, function (acorn) {
-      explodeAcorn(acorn, 0, null);
+      acorn.explode(0);
     });
   }
 
