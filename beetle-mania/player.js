@@ -19,7 +19,7 @@ var Player = Entity.extend({
   radius: 12,
   color: '#000',
   knockedoutColor: '#300',
-  knockedoutMaxSeconds: 4,
+  knockedoutMaxCountdown: 3,
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
 
@@ -30,9 +30,11 @@ var Player = Entity.extend({
     this.playTime = 0;
     this.shootSound = null;
     this.knockedoutSound = null;
+    this.countupSound = null;
     this.knockedout = false;
-    this.knockedoutTime = 0;
-    this.knockedoutMaxTime = 0;
+    this.knockedoutNext = 0;
+    this.knockedoutMaxNext = 0;
+    this.knockedoutCountdown = 0;
     this.strength = 100;
     this.score = 0;
     this.displayedScore = 0;
@@ -51,10 +53,11 @@ var Player = Entity.extend({
     this.y = this.game.height - 30;
     this.shootSound = new Howl({urls: [this.game.asset('fire.wav')]});
     this.knockedoutSound = new Howl({urls: [this.game.asset('knockedout.wav')]});
+    this.countupSound = new Howl({urls: [this.game.asset('countup.wav')]});
+    this.knockedoutMaxNext = this.game.fps;
   },
 
   start: function () {
-    this.knockedoutMaxTime = this.game.fps * this.knockedoutMaxSeconds;
     this.x = this.game.width / 2;
     this.playing = true;
     this.playTime = 0;
@@ -94,10 +97,17 @@ var Player = Entity.extend({
   },
 
   knockOut: function () {
-    this.knockedoutTime = 0;
+    this.knockedoutCountdown = this.knockedoutMaxCountdown;
+    this.knockedoutNext = this.game.fps;
     this.knockedout = true;
     wakeUpSignal = false;
     this.knockedoutSound.play();
+  },
+
+  wakeUp: function () {
+    this.knockedoutCountdown = 0;
+    this.knockedoutNext = 0;
+    this.knockedout = false;
   },
 
   update: function (t) {
@@ -112,6 +122,20 @@ var Player = Entity.extend({
     // Update high score animation
     if (this.highScoreTime > 0) {
       this.highScoreTime -= 1;
+    }
+
+    // Show countdown and end the game if it reaches zero
+    if (this.knockedoutNext > 0) {
+      this.knockedoutNext -= 1;
+      if (this.knockedoutNext <= 0 && this.knockedoutCountdown > 0) {
+        this.countupSound.play();
+        this.knockedoutNext = this.knockedoutMaxNext;
+        this.knockedoutCountdown -= 1;
+        if (this.knockedoutCountdown <= 0) {
+          this.stop();
+          return;
+        }
+      }
     }
 
     // Update only when playing
@@ -134,17 +158,12 @@ var Player = Entity.extend({
     if (wakeUpSignal) {
       wakeUpSignal = false;
       if (this.knockedout) {
-        this.knockedout = false;
+        this.wakeUp();
       }
     }
 
     // Short-circuit if knocked out
     if (this.knockedout) {
-      this.knockedoutTime += 1;
-      if (this.knockedoutTime > this.knockedoutMaxTime) {
-        this.stop();
-        return;
-      }
       this.move = false;//t % 4 >= 2;
       this.blinkFor = 5;
       this.blinkNext = this.blinkDelay;
