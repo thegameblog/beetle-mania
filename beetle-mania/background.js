@@ -72,11 +72,11 @@ module.exports = Entity.extend({
     this.nextHill -= 1;
     if (this.nextHill <= 0) {
       var x = this.game.width;
-      var y = randInt(150, 400);
+      var y = randInt(150, 350);
       var width = randInt(100, 250);
       var height = 420 - y;
       this.group.push(new Hill(0.7, x, y, width, height, '#70A248', '#9EB656'));
-      this.nextHill = randInt(width / 2, 600);
+      this.nextHill = width + randInt(200, 600);
     }
 
     this.nextOpening -= 1;
