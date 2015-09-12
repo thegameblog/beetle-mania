@@ -32,7 +32,7 @@ var Player = Entity.extend({
     this.startLock = 0;
     this.playing = false;
     this.played = false;
-    this.playTime = 0;
+    this.wakeTime = 0;
     this.exploding = false;
     this.shootSound = null;
     this.knockedoutSound = null;
@@ -75,7 +75,7 @@ var Player = Entity.extend({
     this.playing = true;
     this.played = true;
     this.exploding = false;
-    this.playTime = 0;
+    this.wakeTime = 0;
     // TODO: newAcornGenerator()?
     this.score = 0;
     this.strength = 100;
@@ -185,9 +185,6 @@ var Player = Entity.extend({
       this.displayedScoreDelay = 2;
     }
 
-    // Update total play-time
-    this.playTime += 1;
-
     // Update only when not exploding
     if (this.exploding) {
       if (this.displayedScore === this.score && !this.group.containsType(Star)) {
@@ -216,6 +213,9 @@ var Player = Entity.extend({
       this.blinkNext = this.blinkDelay;
       return;
     }
+
+    // Update total wake time
+    this.wakeTime += 1;
 
     // Update position
     if (mouseX !== null) {

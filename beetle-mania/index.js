@@ -22,6 +22,10 @@ var acornCount = 0;
 var shakeCount = 0;
 var shakeOffsetX = 0;
 var shakeOffsetY = 0;
+var difficultyTime = 5400;  // 1.5 minutes
+var easyAcornFreq = 30;
+var hardAcornFreq = 5;
+var acornSpawnCount = 0;
 
 // Add initial entities
 entities.push(player);
@@ -121,20 +125,17 @@ game.update(function (t) {
   }
 
   // Spawn acorn if not knocked out
-  if (!player.knockedout) {
-    // TODO: Base this off of difficulty or number of acorns currently in play?
-    // TODO: var spawnTime = entities.containsType(Star) ? 15 : 5;
-    var spawnTime = !entities.containsType(Star) ? 30 : 15;
-    if (player.playing && player.playTime % spawnTime === 0 && acornCount < env.maxAcorns) {
+  if (player.playing && !player.knockedout && !player.exploding && acornCount < env.maxAcorns) {
+    var difficulty = Math.max(difficultyTime - player.wakeTime, 0) / difficultyTime;
+    var acornFreq = ((easyAcornFreq - hardAcornFreq) * difficulty) + hardAcornFreq;
+    var spawnTime = !entities.containsType(Star) ? acornFreq : 15;
+    acornSpawnCount += 1;
+    if (acornSpawnCount >= spawnTime) {
       entities.push(new Acorn());
+      acornSpawnCount = 0;
     }
   }
 
-  // FUTURE:
-  // var spawnTime = entities.containsType(Star) ? 15 : 1;
-  // if (player.playing && player.playTime % spawnTime === 0 && acornCount < env.maxAcorns) {
-  //   entities.push(new Acorn());
-  // }
   // FUTURE: Drop bonus mode
   // if (!entities.containsType(Star)) {
   //   for (var i = acornCount; i < env.maxAcorns; i++) {
