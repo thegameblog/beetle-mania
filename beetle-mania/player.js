@@ -104,6 +104,12 @@ var Player = Entity.extend({
 
   explode: function () {
     this.exploding = true;
+    // Explode effect
+    var textEffect = new TextEffect(this.x, this.y, 1);
+    this.group.push(textEffect);
+    this.group.explode(
+      function (x, y, vx, vy) { return new Star(x, y, vx, vy, 1, textEffect); },
+      this.x, this.y, 20, 10, 0);
   },
 
   click: function (e) {
@@ -153,10 +159,6 @@ var Player = Entity.extend({
         this.knockedoutNext = this.knockedoutMaxNext;
         this.knockedoutCountdown -= 1;
         if (this.knockedoutCountdown <= 0) {
-          var player = this;
-          this.group.explode(
-            function (x, y, vx, vy) { return new Star(player.x, player.y, vx, vy, 1, new TextEffect(player.x, player.y, 1)); },
-            this.x, this.y, 20, 10, 0);
           this.explode();
           return;
         }
