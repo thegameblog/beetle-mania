@@ -21,7 +21,8 @@ var Player = Entity.extend({
   zindex: 3,
   radius: 12,
   color: '#000',
-  knockedoutColor: '#300',
+  colorInvincible: '#385124',
+  knockedoutColor: '#500',
   knockedoutMaxCountdown: 3,
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
@@ -41,6 +42,8 @@ var Player = Entity.extend({
     this.knockedoutNext = 0;
     this.knockedoutMaxNext = null;
     this.knockedoutCountdown = 0;
+    this.invincible = 0;
+    this.maxInvincible = null;
     this.strength = 100;
     this.score = 0;
     this.displayedScore = 0;
@@ -63,6 +66,7 @@ var Player = Entity.extend({
     this.highScoreSound = new Howl({urls: [this.game.asset('high-score.wav')]});
     this.gameOverSound = new Howl({urls: [this.game.asset('game-over.wav')]});
     this.knockedoutMaxNext = this.game.fps;
+    this.maxInvincible = this.game.fps * 2;
   },
 
   start: function () {
@@ -135,6 +139,7 @@ var Player = Entity.extend({
     this.knockedoutCountdown = 0;
     this.knockedoutNext = 0;
     this.knockedout = false;
+    this.invincible = this.maxInvincible;
   },
 
   update: function (t) {
@@ -197,6 +202,11 @@ var Player = Entity.extend({
       }
     }
 
+    // Adjust invincibility
+    if (this.invincible > 0) {
+      this.invincible -= 1;
+    }
+
     // Short-circuit if knocked out
     if (this.knockedout) {
       this.move = false;//t % 4 >= 2;
@@ -252,6 +262,7 @@ var Player = Entity.extend({
       return;
     }
 
+    // Turn when knocked out
     if (this.knockedout) {
       ctx.save();
       ctx.translate(this.x, this.y);
@@ -259,7 +270,9 @@ var Player = Entity.extend({
       ctx.translate(-this.x, -this.y);
     }
 
-    var color = this.knockedout ? this.knockedoutColor : this.color;
+    var color = (this.knockedout ?
+      this.knockedoutColor :
+      (this.invincible ? this.colorInvincible : this.color));
 
     // Body
     helpers.fillCircle(ctx, this.x, this.y, this.radius, color);
