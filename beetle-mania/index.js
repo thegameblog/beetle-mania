@@ -194,13 +194,22 @@ game.render(function (ctx) {
   }
 
   // Draw score
-  if (player.playing || player.highScore) {
-    ctx.font = 'bold 20px sans-serif';
+  if (player.playing) {
+    if (player.highScore) {
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'end';
+      helpers.outlineText(ctx, player.displayedScore, game.width / 2 - 8, 22, '#333', '#fff');
+      ctx.textAlign = 'start';
+      helpers.outlineText(ctx, player.highScore, game.width / 2 + 8, 22, '#333', '#fff');
+    } else {
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 20px sans-serif';
+      helpers.outlineText(ctx, player.displayedScore, game.width / 2, 22, '#333', '#fff');
+    }
+  } else if (player.highScore) {
     ctx.textAlign = 'center';
-    helpers.outlineText(ctx, player.playing ? player.displayedScore : 'High Score', game.width / 2, 22, '#333', '#fff');
-  }
-  if (player.highScore) {
     ctx.font = 'bold 20px sans-serif';
+    helpers.outlineText(ctx, 'High Score', game.width / 2, 22, '#333', '#fff');
     helpers.outlineText(ctx, player.highScore, game.width / 2, 51, '#333', '#fff');
     if (player.highScoreTime > 0) {
       var offset = player.highScoreTime * 2;
