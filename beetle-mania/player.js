@@ -9,29 +9,40 @@ var helpers = require('./helpers');
 
 var canvas = Gesso.getCanvas();
 var newGameSignal = false;
+var wakeUpSignal = false;
 var bulletCount = 0;
 var mouseX = 0;
 var keysDown = {left: false, right: false};
 
 var Player = Entity.extend({
   zindex: 3,
+  radius: 12,
+  color: '#000',
+  knockedoutColor: '#300',
   shootSound: null,
+  highScoreMaxSeconds: 1,
+  blinkDelaySeconds: 3,
 
   init: function (player) {
     Entity.prototype.init.call(this);
     this.startLock = 0;
     this.playing = false;
     this.playTime = 0;
+    this.knockedout = false;
+    this.knockedoutTime = 0;
+    this.knockedoutMaxTime = 0;
+    this.strength = 100;
     this.score = 0;
     this.displayedScore = 0;
     this.displayedScoreDelay = 0;
+    this.highScore = 0;
+    this.highScoreTime = 0;
+    this.highScoreMaxTime = 0;
     this.x = 0;
     this.y = 0;
-    this.radius = 12;
-    this.color = '#000';
     this.blinkFor = 0;
-    this.blinkNext = 60 * 3;
-    this.blinkDelay = 60 * 3;
+    this.blinkNext = 0;
+    this.blinkDelay = 0;
   },
 
   enter: function () {
@@ -40,20 +51,32 @@ var Player = Entity.extend({
   },
 
   start: function () {
+    this.knockedoutMaxTime = this.game.fps * 3;
     this.x = this.game.width / 2;
     this.playing = true;
     this.playTime = 0;
     // TODO: newAcornGenerator()?
     this.score = 0;
+    this.strength = 100;
     this.displayedScore = 0;
     this.displayedScoreDelay = 0;
+    this.highScoreMaxTime = this.game.fps * this.highScoreMaxSeconds;
+    this.blinkDelay = this.game.fps * this.blinkDelaySeconds;
+    this.blinkNext = this.blinkDelay;
   },
 
   stop: function () {
     this.playing = false;
     this.played = true;
     this.startLock = 30;
-    // TODO: Set high score
+    this.knockedout = false;
+    if (this.score >= this.highScore) {
+      this.highScore = this.score;
+      this.highScoreTime = this.highScoreMaxTime;
+    }
+    this.score = 0;
+    this.displayedScore = 0;
+    this.displayedScoreDelay = 0;
   },
 
   click: function (e) {
@@ -61,6 +84,16 @@ var Player = Entity.extend({
     keysDown.fired = true;
     // Start game if not currently playing
     newGameSignal = true;
+    // Try to wake up signal if knocked out
+    if (this.knockedout) {
+      wakeUpSignal = true;
+    }
+  },
+
+  knockOut: function () {
+    this.knockedoutTime = 0;
+    this.knockedout = true;
+    wakeUpSignal = false;
   },
 
   update: function (t) {
@@ -72,13 +105,47 @@ var Player = Entity.extend({
       }
     }
 
+    // Update high score animation
+    if (this.highScoreTime > 0) {
+      this.highScoreTime -= 1;
+    }
+
     // Update only when playing
     if (!this.playing) {
       return;
     }
 
+    // Update score
+    this.displayedScoreDelay = Math.max(this.displayedScoreDelay - 1, 0);
+    if (this.displayedScore < this.score && this.displayedScoreDelay === 0) {
+      var multiple = this.score - this.displayedScore > 10000 ? 1111 : (this.score - this.displayedScore > 1000 ? 111 : 11);
+      this.displayedScore = Math.min(this.displayedScore + multiple, this.score);
+      this.displayedScoreDelay = 2;
+    }
+
     // Update total play-time
     this.playTime += 1;
+
+    // Wake up from a knockout
+    if (wakeUpSignal) {
+      wakeUpSignal = false;
+      if (this.knockedout) {
+        this.knockedout = false;
+      }
+    }
+
+    // Short-circuit if knocked out
+    if (this.knockedout) {
+      this.knockedoutTime += 1;
+      if (this.knockedoutTime > this.knockedoutMaxTime) {
+        this.stop();
+        return;
+      }
+      this.move = false;//t % 4 >= 2;
+      this.blinkFor = 5;
+      this.blinkNext = this.blinkDelay;
+      return;
+    }
 
     // Update position
     if (mouseX !== null) {
@@ -111,14 +178,6 @@ var Player = Entity.extend({
       }
     }
 
-    // Update score
-    this.displayedScoreDelay = Math.max(this.displayedScoreDelay - 1, 0);
-    if (this.displayedScore < this.score && this.displayedScoreDelay === 0) {
-      var multiple = this.score - this.displayedScore > 10000 ? 1111 : (this.score - this.displayedScore > 1000 ? 111 : 11);
-      this.displayedScore = Math.min(this.displayedScore + multiple, this.score);
-      this.displayedScoreDelay = 2;
-    }
-
     // Adjust personality
     this.move = t % 8 >= 4;
     this.blinkFor = Math.max(0, this.blinkFor - 1);
@@ -135,36 +194,56 @@ var Player = Entity.extend({
       return;
     }
 
-    // Body
-    ctx.fillStyle = this.color;
-    helpers.fillCircle(ctx, this.x, this.y, this.radius, this.color);
-    ctx.fillStyle = '#cc0';
-    if (this.blinkFor > 0) {
-      ctx.fillRect(this.x - 4 - 2, this.y - 7, 4, 1);
-      ctx.fillRect(this.x + 4 - 2, this.y - 7, 4, 1);
-    } else {
-      helpers.fillCircle(ctx, this.x - 4, this.y - 6, 1);
-      helpers.fillCircle(ctx, this.x + 4, this.y - 6, 1);
+    if (this.knockedout) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(0.6);
+      ctx.translate(-this.x, -this.y);
     }
-    ctx.fillStyle = this.color;
+
+    var color = this.knockedout ? this.knockedoutColor : this.color;
+
+    // Body
+    helpers.fillCircle(ctx, this.x, this.y, this.radius, color);
+
+    // Eyes
+    if (this.knockedout) {
+      ctx.strokeStyle = '#cc0';
+      helpers.drawX(ctx, this.x - 4, this.y - 6, 2);
+      helpers.drawX(ctx, this.x + 4, this.y - 6, 2);
+    } else {
+      ctx.fillStyle = '#cc0';
+      if (this.blinkFor > 0) {
+        ctx.fillRect(this.x - 4 - 2, this.y - 7, 4, 1);
+        ctx.fillRect(this.x + 4 - 2, this.y - 7, 4, 1);
+      } else {
+        helpers.fillCircle(ctx, this.x - 4, this.y - 6, 1);
+        helpers.fillCircle(ctx, this.x + 4, this.y - 6, 1);
+      }
+    }
 
     // Neck
+    ctx.fillStyle = color;
     ctx.fillRect(this.x - 4, this.y - 16, 8, 6);
 
     // Mandible
     var moveMandibleBy = this.move ? 0 : 1;
     helpers.scaled(ctx, this.x, this.y - 14 - moveMandibleBy, 1, 0.65, function (x, y) {
-      helpers.fillCircle(ctx, x, y, 6, this.color, Math.PI, 0);
+      helpers.fillCircle(ctx, x, y, 6, color, Math.PI, 0);
     });
 
     // Legs
     var moveLegsBy = this.move ? 0 : 0.3;
-    helpers.fillRotatedRect(ctx, Math.PI + 0.3 + moveLegsBy, this.x - 10, this.y - 6, 8, 2, this.color);
-    helpers.fillRotatedRect(ctx, Math.PI + 0.1 + moveLegsBy, this.x - 12, this.y, 8, 2, this.color);
-    helpers.fillRotatedRect(ctx, Math.PI + -0.1 - moveLegsBy, this.x - 11, this.y + 5, 8, 2, this.color);
-    helpers.fillRotatedRect(ctx, -0.3 - moveLegsBy, this.x + 9, this.y - 8, 8, 2, this.color);
-    helpers.fillRotatedRect(ctx, -0.1 - moveLegsBy, this.x + 11, this.y - 2, 8, 2, this.color);
-    helpers.fillRotatedRect(ctx, 0.1 + moveLegsBy, this.x + 11, this.y + 4, 8, 2, this.color);
+    helpers.fillRotatedRect(ctx, Math.PI + 0.3 + moveLegsBy, this.x - 10, this.y - 6, 8, 2, color);
+    helpers.fillRotatedRect(ctx, Math.PI + 0.1 + moveLegsBy, this.x - 12, this.y, 8, 2, color);
+    helpers.fillRotatedRect(ctx, Math.PI + -0.1 - moveLegsBy, this.x - 11, this.y + 5, 8, 2, color);
+    helpers.fillRotatedRect(ctx, -0.3 - moveLegsBy, this.x + 9, this.y - 8, 8, 2, color);
+    helpers.fillRotatedRect(ctx, -0.1 - moveLegsBy, this.x + 11, this.y - 2, 8, 2, color);
+    helpers.fillRotatedRect(ctx, 0.1 + moveLegsBy, this.x + 11, this.y + 4, 8, 2, color);
+
+    if (this.knockedout) {
+      ctx.restore();
+    }
   }
 });
 
@@ -186,6 +265,8 @@ document.addEventListener('keydown', function (e) {
   } else if (e.which === 38 || e.which === 32 || e.which === 16 || e.which === 88 || e.which === 90) {
     if (!e.repeat) {
       keysDown.fired = true;
+      // Try to wake up signal if knocked out
+      wakeUpSignal = true;
     }
   } else if (e.which !== 40) {  // Ignore down key
     return;

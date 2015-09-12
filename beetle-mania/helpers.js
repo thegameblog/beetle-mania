@@ -77,6 +77,14 @@ var helpers = {
       ctx.fillStyle = fillStyle;
     }
   },
+  drawX: function (ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.moveTo(x - r, y - r);
+    ctx.lineTo(x + r, y + r);
+    ctx.moveTo(x + r, y - r);
+    ctx.lineTo(x - r, y + r);
+    ctx.stroke();
+  },
   outlineText: function (ctx, text, x, y, color, outline) {
     ctx.fillStyle = color;
     ctx.fillText(text, x - 1, y);

@@ -17,6 +17,7 @@ var background = new Background(player);
 var hitSound = new Howl({urls: [game.asset('hit.wav')]});
 var bestHitSound = new Howl({urls: [game.asset('best-hit.wav')]});
 var showClickToStart = false;
+var showKnockedOutMessage = false;
 var acornCount = 0;
 var shakeCount = 0;
 var shakeOffsetX = 0;
@@ -38,6 +39,14 @@ entities.exited(function (entity) {
   }
 });
 
+function explodeAcorn(acorn, multiplier, textEffect) {
+  entities.explode(
+    // TODO: Cap the multiplier? Better sound effect after X?
+    function (x, y, vx, vy) { return new Star(x, y, vx, vy, multiplier, textEffect); },
+    acorn.x, acorn.y, 5, 8, 0);
+  acorn.die();
+}
+
 // Add interactions
 entities.pushInteraction(Star, Acorn, function (star, acorn) {
   // Check for star / acorn collisions
@@ -46,22 +55,19 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
       {x: star.x - star.radius, y: star.y - star.radius, width: star.radius * 2, height: star.radius * 2})) {
     return;
   }
-  // Shake
   shakeCount = 10;
-  // Resurrect textEffect if not alive?
-  star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
-  player.score += env.pointsPerHit * star.textEffect.multiple;
-  if (star.textEffect.multiple >= env.maxAcorns * 0.8) {
-    bestHitSound.play();
-  } else {
-    hitSound.play();
+  if (star.textEffect) {
+    if (star.textEffect.multiple >= env.maxAcorns * 0.8) {
+      bestHitSound.play();
+    } else {
+      hitSound.play();
+    }
+    // Resurrect textEffect if not alive?
+    star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
+    player.score += env.pointsPerHit * star.textEffect.multiple;
   }
-  entities.explode(
-    // TODO: Cap the multiplier? Better sound effect after X?
-    function (x, y, vx, vy) { return new Star(x, y, vx, vy, star.multiplier + 1, star.textEffect); },
-    acorn.x, acorn.y, 5, 8, 0);
+  explodeAcorn(acorn, star.multiplier + 1, star.textEffect);
   star.die();
-  acorn.die();
 });
 entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
   // Check for bullet / acorn collisions
@@ -80,6 +86,20 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
   bullet.die();
   acorn.die();
   hitSound.play();
+});
+entities.pushInteraction(Player, Acorn, function (player, acorn) {
+  if (!player.playing || player.knockedout) {
+    return;
+  }
+  // Check for player / acorn collision
+  var hitRadius = player.radius * 0.33;
+  if (!helpers.intersected(
+      {x: player.x - hitRadius, y: player.y - hitRadius, width: hitRadius * 2, height: hitRadius * 2},
+      {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2})) {
+    return;
+  }
+  player.knockOut();
+  acorn.die();
 });
 
 game.click(function (e) {
@@ -104,10 +124,34 @@ game.update(function (t) {
     shakeOffsetY = 0;
   }
 
-  // Spawn acorn
-  // TODO: Base this off of difficulty or number of acorns currently in play?
-  if (player.playing && player.playTime % env.acornSpawnTime === 0 && acornCount < env.maxAcorns) {
-    entities.push(new Acorn());
+  showKnockedOutMessage = player.knockedout && (t % 10 > 2);
+
+  // Spawn acorn if not knocked out
+  if (!player.knockedout) {
+    // TODO: Base this off of difficulty or number of acorns currently in play?
+    // TODO: var spawnTime = entities.containsType(Star) ? 15 : 5;
+    var spawnTime = !entities.containsType(Star) ? 30 : 15;
+    if (player.playing && player.playTime % spawnTime === 0 && acornCount < env.maxAcorns) {
+      entities.push(new Acorn());
+    }
+  }
+
+  // FUTURE:
+  // var spawnTime = entities.containsType(Star) ? 15 : 1;
+  // if (player.playing && player.playTime % spawnTime === 0 && acornCount < env.maxAcorns) {
+  //   entities.push(new Acorn());
+  // }
+  // FUTURE: Drop bonus mode
+  // if (!entities.containsType(Star)) {
+  //   for (var i = acornCount; i < env.maxAcorns; i++) {
+  //     entities.push(new Acorn());
+  //   }
+  // }
+
+  if (!player.playing && !entities.containsType(Star)) {
+    entities.forEachType(Acorn, function (acorn) {
+      explodeAcorn(acorn, 0, null);
+    });
   }
 
   entities.update(t);
@@ -138,11 +182,33 @@ game.render(function (ctx) {
     helpers.outlineText(ctx, 'Or press \u25c2 \u25B8', game.width - 95, game.height - 20, '#333', '#fff');
   }
 
+  // Draw knocked out mode text
+  if (showKnockedOutMessage) {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 64px sans-serif';
+    helpers.outlineText(ctx, 'Click!', game.width / 2, game.height / 2, '#333', '#fff');
+    // Knocked out time
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 64px sans-serif';
+    helpers.outlineText(ctx, (player.knockedoutTime / this.fps), player.x, player.y - player.r - 12, '#333', '#fff');
+  }
+
   // Draw score
-  if (player.playing || player.played) {
+  if (player.playing || player.highScore) {
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
-    helpers.outlineText(ctx, player ? player.displayedScore : 'High Score', game.width / 2, 22, '#333', '#fff');
+    helpers.outlineText(ctx, player.playing ? player.displayedScore : 'High Score', game.width / 2, 22, '#333', '#fff');
+  }
+  if (player.highScore) {
+    ctx.font = 'bold 20px sans-serif';
+    helpers.outlineText(ctx, player.highScore, game.width / 2, 51, '#333', '#fff');
+    if (player.highScoreTime > 0) {
+      var offset = player.highScoreTime * 2;
+      var fade = player.highScoreTime / player.highScoreMaxTime * 2;
+      ctx.font = 'bold ' + (24 + offset) + 'px sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + fade + ')';
+      ctx.fillText(player.highScore, game.width / 2, 64 + (offset * 1.5));
+    }
   }
 
   ctx.restore();
