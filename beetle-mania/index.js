@@ -172,11 +172,7 @@ game.render(function (ctx) {
     ctx.textAlign = 'center';
     if (showClickToStart) {
       ctx.font = 'bold 64px sans-serif';
-      if (player.played) {
-        helpers.outlineText(ctx, 'Click again!', game.width / 2, game.height / 2, '#333', '#fff');
-      } else {
-        helpers.outlineText(ctx, 'Click to start!', game.width / 2, game.height / 2, '#333', '#fff');
-      }
+      helpers.outlineText(ctx, 'Click to start!', game.width / 2, game.height / 2, '#333', '#fff');
     }
     ctx.font = 'bold 28px sans-serif';
     helpers.outlineText(ctx, 'Or press \u25c2 \u25B8', game.width - 95, game.height - 20, '#333', '#fff');
