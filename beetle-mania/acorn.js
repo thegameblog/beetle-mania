@@ -5,7 +5,7 @@ var helpers = require('./helpers');
 
 module.exports = Entity.extend({
   zindex: 4,
-  radius: 16,
+  radius: 15,
   bounce: 0.9,
   acornHeadColor: '#FFDA96',
   acornBodyColor: '#492F25',
@@ -65,7 +65,7 @@ module.exports = Entity.extend({
         helpers.fillCircle(ctx, x, y, self.radius);
         helpers.fillCircle(ctx, x, y + self.radius - (self.radius / 8), self.radius / 4);
         ctx.fillStyle = self.acornBodyColor;
-        helpers.scaled(ctx, x, y - 14, 1, 0.65, function (x, y) {
+        helpers.scaled(ctx, x, y - 12, 1, 0.65, function (x, y) {
           helpers.fillCircle(ctx, x, y + (self.radius / 2), self.radius, null, Math.PI, 0);
         });
         helpers.fillCircle(ctx, x, y - self.radius - (self.radius / 8), self.radius / 4);
