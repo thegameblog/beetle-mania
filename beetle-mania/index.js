@@ -22,9 +22,6 @@ var acornCount = 0;
 var shakeCount = 0;
 var shakeOffsetX = 0;
 var shakeOffsetY = 0;
-var difficultyTime = 5400;  // 1.5 minutes
-var easyAcornFreq = 30;
-var hardAcornFreq = 5;
 var acornSpawnCount = 0;
 
 // Add initial entities
@@ -126,8 +123,8 @@ game.update(function (t) {
 
   // Spawn acorn if not knocked out
   if (player.playing && !player.knockedout && !player.exploding && acornCount < env.maxAcorns) {
-    var difficulty = Math.max(difficultyTime - player.wakeTime, 0) / difficultyTime;
-    var acornFreq = ((easyAcornFreq - hardAcornFreq) * difficulty) + hardAcornFreq;
+    var difficultyScale = Math.max(env.acornSpawnTimeTransitionSeconds - player.wakeTime, 0) / env.acornSpawnTimeTransitionSeconds;
+    var acornFreq = ((env.acornSpawnTimeEasiest - env.acornSpawnTimeHardest) * difficultyScale) + env.acornSpawnTimeHardest;
     var spawnTime = !entities.containsType(Star) ? acornFreq : 15;
     acornSpawnCount += 1;
     if (acornSpawnCount >= spawnTime) {

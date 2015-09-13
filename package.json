@@ -24,7 +24,9 @@
     "mouseSpeed": 48,
     "maxBullets": 5,
     "bulletSpeed": 10,
-    "acornSpawnTime": 30,
+    "acornSpawnTimeEasiest": 30,
+    "acornSpawnTimeHardest": 5,
+    "acornSpawnTimeTransitionSeconds": 5400,
     "maxAcorns": 40,
     "pointsPerHit": 10
   }
