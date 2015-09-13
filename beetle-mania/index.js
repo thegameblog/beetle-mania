@@ -54,49 +54,51 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
   }
   shakeCount = 10;
   if (star.textEffect) {
+    // Resurrect textEffect if not alive?
+    star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
+    player.score += env.pointsPerHit * star.textEffect.multiple;
     if (star.textEffect.multiple >= env.maxAcorns * 0.8) {
       bestHitSound.play();
     } else {
       hitSound.play();
     }
-    // Resurrect textEffect if not alive?
-    star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
-    player.score += env.pointsPerHit * star.textEffect.multiple;
   }
   acorn.explode(star.multiplier + 1, star.textEffect);
   star.die();
 });
-entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
-  // Check for bullet / acorn collisions
+entities.pushInteraction(Bullet, [Acorn, Star], function (bullet, enemy) {
+  // Check for bullet / enemy collisions
   if (!helpers.intersected(
-      {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2},
+      {x: enemy.x - enemy.radius, y: enemy.y - enemy.radius, width: enemy.radius * 2, height: enemy.radius * 2},
       {x: bullet.x - bullet.radius, y: bullet.y - bullet.radius, width: bullet.radius * 2, height: bullet.radius * 2})) {
     return;
   }
-  shakeCount += 1;
-  player.score += env.pointsPerHit;
-  var textEffect = new TextEffect(acorn.x, acorn.y, 1);
-  entities.push(textEffect);
-  entities.explode(
-    function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2, textEffect); },
-    acorn.x, acorn.y, 5, 8, 0);
+  if (enemy.constructor === Acorn) {
+    shakeCount += 1;
+    player.score += env.pointsPerHit;
+    var textEffect = new TextEffect(enemy.x, enemy.y, 1);
+    entities.push(textEffect);
+    entities.explode(
+      function (x, y, vx, vy) { return new Star(x, y, vx, vy, 2, textEffect); },
+      enemy.x, enemy.y, 5, 8, 0);
+    hitSound.play();
+  }
   bullet.die();
-  acorn.die();
-  hitSound.play();
+  enemy.die();
 });
-entities.pushInteraction(Player, Acorn, function (player, acorn) {
+entities.pushInteraction(Player, [Acorn, Star], function (player, enemy) {
   if (!player.playing || player.knockedout || player.invincible || player.exploding || player.cheat) {
     return;
   }
-  // Check for player / acorn collision
-  var hitRadius = player.radius * 0.33;
+  // Check for player / enemy collision
+  var hitRadius = player.radius * 0.75;
   if (!helpers.intersected(
       {x: player.x - hitRadius, y: player.y - hitRadius, width: hitRadius * 2, height: hitRadius * 2},
-      {x: acorn.x - acorn.radius, y: acorn.y - acorn.radius, width: acorn.radius * 2, height: acorn.radius * 2})) {
+      {x: enemy.x - enemy.radius, y: enemy.y - enemy.radius, width: enemy.radius * 2, height: enemy.radius * 2})) {
     return;
   }
   player.knockOut();
-  acorn.die();
+  enemy.die();
 });
 
 game.click(function (e) {
