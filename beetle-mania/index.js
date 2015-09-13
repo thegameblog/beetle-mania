@@ -58,6 +58,7 @@ entities.pushInteraction(Star, Acorn, function (star, acorn) {
     star.textEffect.reset(acorn.x, acorn.y, star.textEffect.multiple + 1);
     player.score += env.pointsPerHit * star.textEffect.multiple;
     if (star.textEffect.multiple >= env.maxAcorns * 0.8) {
+      bestHitSound.stop();
       bestHitSound.play();
     } else {
       hitSound.play();
