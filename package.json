@@ -19,15 +19,14 @@
   },
   "game": {
     "gravity": 0.2,
-    "particleMargin": 60,
     "keyboardSpeed": 6,
     "mouseSpeed": 48,
     "maxBullets": 5,
     "bulletSpeed": 10,
+    "maxAcorns": 40,
     "acornSpawnTimeEasiest": 30,
     "acornSpawnTimeHardest": 5,
     "acornSpawnTimeTransitionSeconds": 5400,
-    "maxAcorns": 40,
     "pointsPerHit": 10
   }
 }
