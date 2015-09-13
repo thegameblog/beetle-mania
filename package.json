@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "class.extend": "^0.9.1",
-    "gesso": "^0.11.0",
+    "gesso": "^0.12.0",
     "gesso-entity": "~0.0.1",
     "howler": "^1.1.26"
   },
