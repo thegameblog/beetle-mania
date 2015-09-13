@@ -14,7 +14,7 @@ module.exports = Entity.extend({
     Entity.prototype.init.call(this);
     this.x = 0;
     this.y = -this.radius;
-    this.vx = helpers.randInt(1, 5) * (helpers.randInt(0, 1) ? -1 : 1);
+    this.vx = 5 * (helpers.randInt(0, 1) ? -1 : 1);
     this.vy = 0;
     this.ground = 0;
     this.angle = 0;
