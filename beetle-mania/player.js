@@ -94,7 +94,7 @@ var Player = Entity.extend({
     this.exploding = false;
     this.startLock = 30;
     this.knockedout = false;
-    if (this.score >= this.highScore) {
+    if (this.score > 0 && this.score >= this.highScore) {
       this.highScore = this.score;
       this.highScoreTime = this.highScoreMaxTime;
       this.highScoreSound.play();
