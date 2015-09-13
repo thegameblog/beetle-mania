@@ -27,16 +27,6 @@ var Player = Entity.extend({
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
 
-  invincibleCheat: (
-    typeof document.location !== 'undefined' &&
-    typeof document.location.search !== 'undefined' &&
-    document.location.search.indexOf('geno=true') > 0),
-
-  starCheat: (
-    typeof document.location !== 'undefined' &&
-    typeof document.location.search !== 'undefined' &&
-    document.location.search.indexOf('smithy=true') > 0),
-
   init: function (player) {
     Entity.prototype.init.call(this);
     this.startLock = 0;
@@ -44,6 +34,8 @@ var Player = Entity.extend({
     this.played = false;
     this.wakeTime = 0;
     this.exploding = false;
+    this.invincibleCheat = null;
+    this.starCheat = null;
     this.shootSound = null;
     this.knockedoutSound = null;
     this.countupSound = null;
@@ -71,6 +63,8 @@ var Player = Entity.extend({
 
   enter: function () {
     this.y = this.game.height - 30;
+    this.invincibleCheat = !!this.game.param('geno');
+    this.starCheat = !!this.game.param('smithy');
     this.shootSound = new Howl({urls: [this.game.asset('fire.wav')]});
     this.knockedoutSound = new Howl({urls: [this.game.asset('knockedout.wav')]});
     this.countupSound = new Howl({urls: [this.game.asset('countup.wav')]});
