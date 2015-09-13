@@ -85,7 +85,7 @@ entities.pushInteraction(Bullet, Acorn, function (bullet, acorn) {
   hitSound.play();
 });
 entities.pushInteraction(Player, Acorn, function (player, acorn) {
-  if (!player.playing || player.knockedout || player.invincible || player.exploding) {
+  if (!player.playing || player.knockedout || player.invincible || player.exploding || player.cheat) {
     return;
   }
   // Check for player / acorn collision

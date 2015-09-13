@@ -27,6 +27,11 @@ var Player = Entity.extend({
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
 
+  cheat: (
+    typeof document.location !== 'undefined' &&
+    typeof document.location.search !== 'undefined' &&
+    document.location.search.indexOf('geno=true') > 0),
+
   init: function (player) {
     Entity.prototype.init.call(this);
     this.startLock = 0;
