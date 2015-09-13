@@ -88,7 +88,8 @@ entities.pushInteraction(Bullet, [Acorn, Star], function (bullet, enemy) {
   enemy.die();
 });
 entities.pushInteraction(Player, [Acorn, Star], function (player, enemy) {
-  if (!player.playing || player.knockedout || player.invincible || player.exploding || player.cheat) {
+  if (!player.playing || player.knockedout || player.invincible || player.exploding ||
+      player.invincibleCheat || (enemy.constructor === Star && player.starCheat)) {
     return;
   }
   // Check for player / enemy collision
