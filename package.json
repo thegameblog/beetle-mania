@@ -2,7 +2,7 @@
   "name": "beetle-mania",
   "version": "1.0.0",
   "author": "Joe Esposito <joe@joeyespo.com>",
-  "description": "A remake of a secret mini-game in Mario RPG.",
+  "description": "Try to survive as star-shooting beetle while acorns fall from trees.",
   "homepage": "http://github.com/thegameblog/beetle-mania",
   "license": "MIT",
   "private": true,

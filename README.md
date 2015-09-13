@@ -4,7 +4,7 @@ Beetle Mania
 [![Screenshot](beetle-mania.png)](http://thegameblog.com/beetle-mania)
 
 
-A remake of a secret mini-game in Mario RPG.
+Try to survive as star-shooting beetle while acorns fall from trees.
 
 [Play it!](http://thegameblog.com/beetle-mania)
 
