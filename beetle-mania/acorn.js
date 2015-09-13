@@ -18,7 +18,6 @@ module.exports = Entity.extend({
     this.vy = 0;
     this.ground = 0;
     this.angle = 0;
-    this.rotation = 0.1;
     this.bouncy = true;
   },
 
@@ -35,7 +34,7 @@ module.exports = Entity.extend({
     this.die();
   },
 
-  update: function () {
+  update: function (t) {
     this.x += this.vx;
     if (this.x + this.radius > this.game.width && this.vx > 0 ||
         this.x - this.radius < 0 && this.vx < 0) {
@@ -49,11 +48,8 @@ module.exports = Entity.extend({
     if (this.y > this.game.height + this.radius) {
       this.die();
     }
-    this.angle += this.rotation;
-    if (this.angle < -0.3 && this.rotation < 0 ||
-        this.angle > 0.3 && this.rotation > 0) {
-      this.rotation = -this.rotation;
-    }
+    // Synchronize acorn angles using t
+    this.angle = Math.abs((t / 10) % 1.2 - 0.6) - 0.3;
   },
 
   render: function (ctx) {
