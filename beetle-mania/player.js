@@ -1,6 +1,5 @@
 /* globals document */
 
-var Gesso = require('gesso');
 var Entity = require('gesso-entity').Entity;
 var Howl = require('howler').Howl;
 var env = require('../package.json').game;
@@ -10,7 +9,6 @@ var Bullet = require('./bullet');
 var TextEffect = require('./text-effect');
 var helpers = require('./helpers');
 
-var canvas = Gesso.getCanvas();
 var newGameSignal = false;
 var wakeUpSignal = false;
 var bulletCount = 0;
@@ -123,13 +121,19 @@ var Player = Entity.extend({
   },
 
   click: function (e) {
-    mouseX = e.clientX - canvas.getBoundingClientRect().left;
+    mouseX = e.x;
     keysDown.fired = true;
     // Start game if not currently playing
     newGameSignal = true;
     // Try to wake up signal if knocked out
     if (this.knockedout) {
       wakeUpSignal = true;
+    }
+  },
+
+  pointermove: function (e) {
+    if (mouseX !== null) {
+      mouseX = e.x;
     }
   },
 
@@ -322,16 +326,6 @@ var Player = Entity.extend({
       ctx.restore();
     }
   }
-});
-
-// TODO: Mobile controls
-var canvas = Gesso.getCanvas();
-document.addEventListener('mousemove', function (e) {
-  if (mouseX === null) {
-    return;
-  }
-  var rect = canvas.getBoundingClientRect();
-  mouseX = e.clientX - rect.left;
 });
 
 document.addEventListener('keydown', function (e) {

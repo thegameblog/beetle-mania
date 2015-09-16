@@ -104,7 +104,11 @@ entities.pushInteraction(Player, [Acorn, Star], function (player, enemy) {
 });
 
 game.click(function (e) {
-  return entities.click(e);
+  return entities.invoke('click', e);
+});
+
+game.pointermove(function (e) {
+  return entities.invoke('pointermove', e);
 });
 
 // TODO: controller entity
