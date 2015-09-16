@@ -68,6 +68,18 @@ var Player = Entity.extend({
     this.gameOverSound = new Howl({urls: [this.game.asset('game-over.wav')]});
     this.knockedoutMaxNext = this.game.fps;
     this.maxInvincible = this.game.fps * 2;
+    // Count bullets
+    var self = this;
+    this.group.entered(function (entity) {
+      if (entity.constructor === Bullet) {
+        self.bulletCount += 1;
+      }
+    });
+    this.group.exited(function (entity) {
+      if (entity.constructor === Bullet) {
+        self.bulletCount -= 1;
+      }
+    });
   },
 
   start: function () {
@@ -276,12 +288,8 @@ var Player = Entity.extend({
       this.fired = false;
       // Limit bullet count
       if (this.bulletCount < env.maxBullets) {
-        var self = this;
-        var bullet = new Bullet(this.x, this.y - this.radius - 10);
-        bullet.entered(function () { self.bulletCount += 1; });
-        bullet.exited(function () { self.bulletCount -= 1; });
+        this.group.push(new Bullet(this.x, this.y - this.radius - 10));
         this.shootSound.play();
-        this.group.push(bullet);
       }
     }
 
