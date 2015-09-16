@@ -1,5 +1,3 @@
-/* globals document */
-
 var Entity = require('gesso-entity').Entity;
 var Howl = require('howler').Howl;
 var env = require('../package.json').game;
@@ -8,12 +6,6 @@ var Star = require('./star');
 var Bullet = require('./bullet');
 var TextEffect = require('./text-effect');
 var helpers = require('./helpers');
-
-var newGameSignal = false;
-var wakeUpSignal = false;
-var bulletCount = 0;
-var mouseX = 0;
-var keysDown = {left: false, right: false};
 
 var Player = Entity.extend({
   zindex: 3,
@@ -30,6 +22,12 @@ var Player = Entity.extend({
     this.startLock = 0;
     this.playing = false;
     this.played = false;
+    this.leftKeyDown = false;
+    this.rightKeyDown = false;
+    this.fired = false;
+    this.wakeUpSignal = false;
+    this.newGameSignal = false;
+    this.bulletCount = 0;
     this.wakeTime = 0;
     this.exploding = false;
     this.invincibleCheat = null;
@@ -121,19 +119,49 @@ var Player = Entity.extend({
   },
 
   click: function (e) {
-    mouseX = e.x;
-    keysDown.fired = true;
+    this.mouseX = e.x;
+    this.fired = true;
     // Start game if not currently playing
-    newGameSignal = true;
+    this.newGameSignal = true;
     // Try to wake up signal if knocked out
     if (this.knockedout) {
-      wakeUpSignal = true;
+      this.wakeUpSignal = true;
     }
   },
 
   pointermove: function (e) {
-    if (mouseX !== null) {
-      mouseX = e.x;
+    if (this.mouseX !== null) {
+      this.mouseX = e.x;
+    }
+  },
+
+  keydown: function (e) {
+    if (e.which === 37 || e.which === 65) {
+      this.leftKeyDown = true;
+    } else if (e.which === 39 || e.which === 68) {
+      this.rightKeyDown = true;
+    } else if (e.which === 83 || e.which === 38 || e.which === 32 || e.which === 190 || e.which === 191 || e.which === 88 || e.which === 90) {
+      if (!e.repeat) {
+        this.fired = true;
+        // Try to wake up signal if knocked out
+        this.wakeUpSignal = true;
+      }
+    } else if (e.which !== 40) {  // Ignore down key
+      return;
+    }
+    // Switch to keyboard controls when moving
+    if (e.which === 37 || e.which === 65 || e.which === 39 || e.which === 68) {
+      this.mouseX = null;
+    }
+    // Start new game if not currently playing
+    this.newGameSignal = true;
+  },
+
+  keyup: function (e) {
+    if (e.which === 37 || e.which === 65) {
+      this.leftKeyDown = false;
+    } else if (e.which === 39 || e.which === 68) {
+      this.rightKeyDown = false;
     }
   },
 
@@ -141,7 +169,7 @@ var Player = Entity.extend({
     this.knockedoutCountdown = this.knockedoutMaxCountdown;
     this.knockedoutNext = this.game.fps;
     this.knockedout = true;
-    wakeUpSignal = false;
+    this.wakeUpSignal = false;
     this.knockedoutSound.play();
   },
 
@@ -154,8 +182,8 @@ var Player = Entity.extend({
 
   update: function (t) {
     // Start a new game
-    if (newGameSignal) {
-      newGameSignal = false;
+    if (this.newGameSignal) {
+      this.newGameSignal = false;
       if (this.startLock === 0 && !this.playing) {
         this.start();
       }
@@ -202,8 +230,8 @@ var Player = Entity.extend({
     }
 
     // Wake up from a knockout
-    if (wakeUpSignal) {
-      wakeUpSignal = false;
+    if (this.wakeUpSignal) {
+      this.wakeUpSignal = false;
       if (this.knockedout) {
         this.wakeUp();
       }
@@ -226,31 +254,32 @@ var Player = Entity.extend({
     this.wakeTime += 1;
 
     // Update position
-    if (mouseX !== null) {
-      if (mouseX < this.x) {
-        this.x = helpers.clamp(this.x - env.mouseSpeed, Math.max(this.radius + 2, mouseX), this.game.width - this.radius - 2);
-      } else if (mouseX > this.x) {
-        this.x = helpers.clamp(this.x + env.mouseSpeed, this.radius + 2, Math.min(this.game.width - this.radius - 2, mouseX));
+    if (this.mouseX !== null) {
+      if (this.mouseX < this.x) {
+        this.x = helpers.clamp(this.x - env.mouseSpeed, Math.max(this.radius + 2, this.mouseX), this.game.width - this.radius - 2);
+      } else if (this.mouseX > this.x) {
+        this.x = helpers.clamp(this.x + env.mouseSpeed, this.radius + 2, Math.min(this.game.width - this.radius - 2, this.mouseX));
       }
     }
 
     var x = this.x;
-    if (keysDown.left) {
+    if (this.leftKeyDown) {
       x -= env.keyboardSpeed;
     }
-    if (keysDown.right) {
+    if (this.rightKeyDown) {
       x += env.keyboardSpeed;
     }
     this.x = helpers.clamp(x, this.radius + 2, this.game.width - this.radius - 2);
 
     // Fire
-    if (keysDown.fired) {
-      keysDown.fired = false;
+    if (this.fired) {
+      this.fired = false;
       // Limit bullet count
-      if (bulletCount < env.maxBullets) {
+      if (this.bulletCount < env.maxBullets) {
+        var self = this;
         var bullet = new Bullet(this.x, this.y - this.radius - 10);
-        bullet.entered(function () { bulletCount += 1; });
-        bullet.exited(function () { bulletCount -= 1; });
+        bullet.entered(function () { self.bulletCount += 1; });
+        bullet.exited(function () { self.bulletCount -= 1; });
         this.shootSound.play();
         this.group.push(bullet);
       }
@@ -325,43 +354,6 @@ var Player = Entity.extend({
     if (this.knockedout) {
       ctx.restore();
     }
-  }
-});
-
-document.addEventListener('keydown', function (e) {
-  if (e.which === 37 || e.which === 65) {
-    keysDown.left = true;
-  } else if (e.which === 39 || e.which === 68) {
-    keysDown.right = true;
-  } else if (e.which === 83 || e.which === 38 || e.which === 32 || e.which === 190 || e.which === 191 || e.which === 88 || e.which === 90) {
-    if (!e.repeat) {
-      keysDown.fired = true;
-      // Try to wake up signal if knocked out
-      wakeUpSignal = true;
-    }
-  } else if (e.which !== 40) {  // Ignore down key
-    return;
-  }
-
-  // Switch to keyboard controls when moving
-  if (e.which === 37 || e.which === 65 || e.which === 39 || e.which === 68) {
-    mouseX = null;
-  }
-
-  // Start new game if not currently playing
-  newGameSignal = true;
-
-  if (e.target === document.body) {
-    e.preventDefault();
-    return false;
-  }
-});
-
-document.addEventListener('keyup', function (e) {
-  if (e.which === 37 || e.which === 65) {
-    keysDown.left = false;
-  } else if (e.which === 39 || e.which === 68) {
-    keysDown.right = false;
   }
 });
 

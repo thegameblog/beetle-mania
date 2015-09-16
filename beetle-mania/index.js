@@ -28,7 +28,7 @@ var acornSpawnCount = 0;
 entities.push(player);
 entities.push(background);
 
-// Callbacks
+// Count acorns
 entities.entered(function (entity) {
   if (entity.constructor === Acorn) {
     acornCount += 1;
@@ -103,13 +103,11 @@ entities.pushInteraction(Player, [Acorn, Star], function (player, enemy) {
   enemy.die();
 });
 
-game.click(function (e) {
-  return entities.invoke('click', e);
-});
-
-game.pointermove(function (e) {
-  return entities.invoke('pointermove', e);
-});
+// Propagate input events
+game.click(function (e) { return entities.invoke('click', e); });
+game.pointermove(function (e) { return entities.invoke('pointermove', e); });
+game.keydown(function (e) { return entities.invoke('keydown', e); });
+game.keyup(function (e) { return entities.invoke('keyup', e); });
 
 // TODO: controller entity
 
