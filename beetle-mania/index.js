@@ -118,6 +118,7 @@ game.update(function (t) {
     player.startLock -= 1;
   }
 
+  // Shake the screen
   if (shakeCount > 0) {
     shakeCount -= 1;
     shakeOffsetX = helpers.randInt(2, 4, true);
@@ -126,6 +127,9 @@ game.update(function (t) {
     shakeOffsetX = 0;
     shakeOffsetY = 0;
   }
+
+  // Knocked out message
+  showKnockedOutMessage = player.knockedout && (t % 10 > 2);
 
   // Spawn acorn if not knocked out
   if (player.playing && !player.knockedout && !player.exploding && acornCount < env.maxAcorns) {
