@@ -159,7 +159,7 @@ var Player = Entity.extend({
         this.wakeUpSignal = true;
       }
     } else if (e.which !== 40) {  // Ignore down key
-      return;
+      return false;
     }
     // Switch to keyboard controls when moving
     if (e.which === 37 || e.which === 65 || e.which === 39 || e.which === 68) {
@@ -167,6 +167,8 @@ var Player = Entity.extend({
     }
     // Start new game if not currently playing
     this.newGameSignal = true;
+    // Key is handled
+    return true;
   },
 
   keyup: function (e) {
