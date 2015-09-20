@@ -4,7 +4,7 @@ var helpers = {
   },
   randInt: function (min, max, includeNegatives) {
     var value = Math.floor(Math.random() * (max - min + 1)) + min;
-    if (includeNegatives && helpers.randInt(0, 1) == 1) {
+    if (includeNegatives && helpers.randInt(0, 1) === 1) {
       value = -value;
     }
     return value;
