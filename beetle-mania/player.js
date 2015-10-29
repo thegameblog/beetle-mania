@@ -14,6 +14,8 @@ var Player = Entity.extend({
   colorInvincible: '#385124',
   knockedoutColor: '#500',
   knockedoutMaxCountdown: 3,
+  fullStrength: 1,
+  fullEnergy: 1,
   highScoreMaxSeconds: 1,
   blinkDelaySeconds: 3,
 
@@ -37,13 +39,14 @@ var Player = Entity.extend({
     this.countupSound = null;
     this.highScoreSound = null;
     this.gameOverSound = null;
+    this.strength = this.fullStrength;
     this.knockedout = false;
     this.knockedoutNext = 0;
     this.knockedoutMaxNext = null;
     this.knockedoutCountdown = 0;
+    this.energy = this.fullEnergy;
     this.invincible = 0;
     this.maxInvincible = null;
-    this.strength = 100;
     this.score = 0;
     this.displayedScore = 0;
     this.displayedScoreDelay = 0;
@@ -90,7 +93,8 @@ var Player = Entity.extend({
     this.wakeTime = 0;
     // TODO: newAcornGenerator()?
     this.score = 0;
-    this.strength = 100;
+    this.strength = this.fullStrength;
+    this.energy = this.fullEnergy;
     this.displayedScore = 0;
     this.displayedScoreDelay = 0;
     this.highScoreMaxTime = this.game.fps * this.highScoreMaxSeconds;
@@ -156,7 +160,9 @@ var Player = Entity.extend({
       if (!e.repeat) {
         this.fired = true;
         // Try to wake up signal if knocked out
-        this.wakeUpSignal = true;
+        if (this.knockedout) {
+          this.wakeUpSignal = true;
+        }
       }
     } else if (e.which !== 40) {  // Ignore down key
       return false;
@@ -184,6 +190,7 @@ var Player = Entity.extend({
     this.knockedoutNext = this.game.fps;
     this.knockedout = true;
     this.wakeUpSignal = false;
+    this.strength /= 2;
     this.knockedoutSound.play();
   },
 
@@ -243,21 +250,23 @@ var Player = Entity.extend({
       return;
     }
 
-    // Wake up from a knockout
-    if (this.wakeUpSignal) {
-      this.wakeUpSignal = false;
-      if (this.knockedout) {
-        this.wakeUp();
-      }
-    }
-
     // Adjust invincibility
     if (this.invincible > 0) {
       this.invincible -= 1;
     }
 
-    // Short-circuit if knocked out
+    // Wake up from a knockout
     if (this.knockedout) {
+      this.energy -= 0.001;
+      if (this.wakeUpSignal) {
+        this.wakeUpSignal = false;
+        this.energy += this.strength;
+        if (this.energy >= this.fullEnergy) {
+          this.energy = this.fullEnergy;
+          this.wakeUp();
+        }
+      }
+      // Short-circuit if knocked out
       this.move = false;//t % 4 >= 2;
       this.blinkFor = 5;
       this.blinkNext = this.blinkDelay;
