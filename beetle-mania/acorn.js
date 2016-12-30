@@ -1,4 +1,4 @@
-var Entity = require('gesso-entity').Entity;
+var Entity = require('../gesso-entity').Entity;
 var env = require('../package.json').game;
 var Star = require('./star');
 var helpers = require('./helpers');

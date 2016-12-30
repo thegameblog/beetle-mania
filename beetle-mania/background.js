@@ -1,5 +1,5 @@
 var randInt = require('./helpers').randInt;
-var Entity = require('gesso-entity').Entity;
+var Entity = require('../gesso-entity').Entity;
 var helpers = require('./helpers');
 
 var Block = Entity.extend({

@@ -1,4 +1,4 @@
-var Entity = require('gesso-entity').Entity;
+var Entity = require('../gesso-entity').Entity;
 var Howl = require('howler').Howl;
 var env = require('../package.json').game;
 var Acorn = require('./acorn');

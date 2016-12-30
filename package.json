@@ -12,10 +12,9 @@
     "build": "gesso build"
   },
   "dependencies": {
-    "class.extend": "^0.9.1",
-    "gesso": "^0.12.0",
-    "gesso-entity": "~0.0.1",
-    "howler": "^1.1.26"
+    "class.extend": "0.9.1",
+    "gesso": "0.13.0",
+    "howler": "1.1.26"
   },
   "game": {
     "gravity": 0.2,

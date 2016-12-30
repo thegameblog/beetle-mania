@@ -1,5 +1,5 @@
 var Gesso = require('gesso');
-var Group = require('gesso-entity').Group;
+var Group = require('../gesso-entity').Group;
 var Howl = require('howler').Howl;
 var env = require('../package.json').game;
 var Player = require('./player');

@@ -1,4 +1,4 @@
-var Entity = require('gesso-entity').Entity;
+var Entity = require('../gesso-entity').Entity;
 var helpers = require('./helpers');
 
 module.exports = Entity.extend({
